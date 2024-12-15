@@ -1,7 +1,13 @@
 {
   "version": 1,
   "data": [{
-    "id": "WEBVIEW_06d4ff0a-367b-477a-8d71-dc4dab302f71",
+    "id": "97b6332e-c88f-4c31-b793-1b5d99721f6c",
+    "src": "https://uniportal.huawei.com"
+  }, {
+    "id": "06d4ff0a-367b-477a-8d71-dc4dab302f71",
     "src": "https://www.baidu.com"
+  }, {
+    "id": "e78a2bca-8432-4f9d-b875-66dcbc87f3ef",
+    "src": "https://www.bing.com"
   }]
 }

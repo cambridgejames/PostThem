@@ -36,6 +36,7 @@ module.exports = {
     "operator-linebreak": ["error", "before"],
     "quote-props": ["error", "as-needed"],
     "space-before-function-paren": 0,
+    "vue/first-attribute-linebreak": ["error", "never"],
     "vue/max-attributes-per-line": "off",
     indent: ["error", 2],
     quotes: ["error", "double"],

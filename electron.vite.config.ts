@@ -33,6 +33,14 @@ export default defineConfig({
         "@interface": resolve(__dirname, "./src/interface"),
       },
     },
+    css: {
+      preprocessorOptions: {
+        scss: {
+          api: "modern",
+          additionalData: "@use '@content/assets/mixin.scss';",
+        },
+      },
+    },
     plugins: [
       vue({
         template: {

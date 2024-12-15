@@ -13,7 +13,7 @@ const buildWebviewPageRouter = async (): Promise<Array<RouteRecordRaw>> => {
     for (const item of webviewConfigureItems) {
       solution.push({
         path: item.id,
-        name: item.id,
+        name: `WEBVIEW_${item.id}`,
         component: webviewTabComponent,
       });
     }
