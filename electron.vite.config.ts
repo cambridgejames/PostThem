@@ -12,6 +12,12 @@ export default defineConfig({
     plugins: [
       externalizeDepsPlugin(),
     ],
+    resolve: {
+      alias: {
+        "@preload": resolve(__dirname, "./src/preload"),
+        "@interface": resolve(__dirname, "./src/interface"),
+      },
+    },
   },
   renderer: {
     root: resolve(__dirname, "./src/content"),
@@ -23,7 +29,8 @@ export default defineConfig({
     },
     resolve: {
       alias: {
-        "@content": resolve(__dirname, ".src/content"),
+        "@content": resolve(__dirname, "./src/content"),
+        "@interface": resolve(__dirname, "./src/interface"),
       },
     },
     plugins: [

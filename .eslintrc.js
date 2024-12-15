@@ -13,6 +13,7 @@ module.exports = {
   rules: {
     "@typescript-eslint/ban-types": "off",
     "@typescript-eslint/no-empty-function": "off",
+    "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-inferrable-types": "off",
     "@typescript-eslint/no-non-null-assertion": "off",
     "@typescript-eslint/no-var-requires": 0,
@@ -28,6 +29,10 @@ module.exports = {
     "no-debugger": process.env.NODE_ENV === "production" ? "warn" : "off",
     "no-empty": "error",
     "no-unused-vars": "off",
+    "object-curly-spacing": ["error", "always", {
+      arraysInObjects: false,
+      objectsInObjects: false,
+    }],
     "operator-linebreak": ["error", "before"],
     "quote-props": ["error", "as-needed"],
     "space-before-function-paren": 0,

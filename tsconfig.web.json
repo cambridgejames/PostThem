@@ -6,6 +6,7 @@
     "src/content/**/*.ts",
     "src/content/**/*.vue",
     "src/preload/*.d.ts",
+    "src/interface/**/*"
   ],
   "compilerOptions": {
     "target": "esnext",
@@ -28,6 +29,9 @@
       "@content/*": [
         "src/content/*",
       ],
+      "@interface/*": [
+        "src/interface/*",
+      ]
     },
     "lib": [
       "esnext",

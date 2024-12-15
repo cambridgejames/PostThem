@@ -13,9 +13,9 @@ function createWindow(): void {
     ...(process.platform === "linux" ? { icon } : {}),
     webPreferences: {
       webviewTag: true,
-      preload: join(__dirname, "../preload/index.js"),
       sandbox: false,
-    }
+      preload: join(__dirname, "../preload/index.js"),
+    },
   });
 
   mainWindow.on("ready-to-show", () => {
@@ -34,6 +34,7 @@ function createWindow(): void {
   } else {
     mainWindow.loadFile(join(__dirname, "../content/index.html"));
   }
+  mainWindow.webContents.openDevTools();
 }
 
 // This method will be called when Electron has finished

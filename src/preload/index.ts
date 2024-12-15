@@ -1,6 +1,8 @@
 import { contextBridge } from "electron";
 import { electronAPI } from "@electron-toolkit/preload";
 
+import { utils } from "@preload/util";
+
 // Custom APIs for content
 const api = {};
 
@@ -11,6 +13,7 @@ if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld("electron", electronAPI);
     contextBridge.exposeInMainWorld("api", api);
+    contextBridge.exposeInMainWorld("util", utils);
   } catch (error) {
     console.error(error);
   }

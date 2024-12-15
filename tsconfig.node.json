@@ -4,9 +4,35 @@
     "electron.vite.config.*",
     "src/main/**/*",
     "src/preload/**/*",
+    "src/interface/**/*"
   ],
   "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "strict": true,
+    "jsx": "preserve",
+    "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "useDefineForClassFields": true,
+    "sourceMap": true,
+    "resolveJsonModule": true,
+    "useUnknownInCatchVariables": false,
     "composite": true,
-    "types": ["electron-vite/node"],
+    "baseUrl": ".",
+    "paths": {
+      "@preload/*": [
+        "src/preload/*"
+      ],
+      "@interface/*": [
+        "src/interface/*"
+      ],
+    },
+    "types": [
+      "electron-vite/node"
+    ],
   },
 }
