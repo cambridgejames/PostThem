@@ -1,7 +1,7 @@
 <template>
   <div class="webview-container">
-    <webview v-show="isLoadFinish" ref="webview" :src="props.configure.src" :partition="`persist:${props.configure.id}`"
-             class="webview" />
+    <webview v-show="isLoadFinish" ref="webview" :key="props.configure.id" class="webview"
+             :src="props.configure.src" :partition="`persist:${props.configure.id}`"/>
     <div v-show="!isLoadFinish" class="loading">loading</div>
   </div>
   <div>{{ $route.fullPath }}</div>
