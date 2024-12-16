@@ -1,0 +1,87 @@
+/* 基本颜色定义 */
+:root {
+  --pt-color-define-blue: #1996c7;
+  --pt-color-define-green: #149f28;
+  --pt-color-define-yellow: #f2dc1e;
+  --pt-color-define-orange: #e88a1c;
+  --pt-color-define-red: #d5241b;
+  --pt-color-define-white: #ffffff;
+  --pt-color-define-gray: #7f7f7f;
+  --pt-color-define-black: #000000;
+}
+
+/* PostThemDark颜色主题 颜色定义 */
+:root.dark {
+  --pt-color-theme-primary: var(--pt-color-define-blue);
+  --pt-color-theme-success: var(--pt-color-define-green);
+  --pt-color-theme-warning: var(--pt-color-define-yellow);
+  --pt-color-theme-danger: var(--pt-color-define-orange);
+  --pt-color-theme-error: var(--pt-color-define-red);
+  --pt-color-theme-white: var(--pt-color-define-black);
+  --pt-color-theme-gray: var(--pt-color-define-gray);
+  --pt-color-theme-black: var(--pt-color-define-white);
+}
+
+/* PostThemLight颜色主题 颜色定义 */
+:root {
+  --pt-color-theme-primary: var(--pt-color-define-blue);
+  --pt-color-theme-success-light: var(--pt-color-define-green);
+  --pt-color-theme-warning: var(--pt-color-define-yellow);
+  --pt-color-theme-danger: var(--pt-color-define-orange);
+  --pt-color-theme-error: var(--pt-color-define-red);
+  --pt-color-theme-white: var(--pt-color-define-white);
+  --pt-color-theme-gray: var(--pt-color-define-gray);
+  --pt-color-theme-black: var(--pt-color-define-black);
+}
+
+:root {
+  --pt-color-theme-primary-light-1: color-mix(in srgb, var(--pt-color-theme-primary), var(--pt-color-theme-white) 20%);
+  --pt-color-theme-primary-light-2: color-mix(in srgb, var(--pt-color-theme-primary), var(--pt-color-theme-white) 40%);
+  --pt-color-theme-primary-light-3: color-mix(in srgb, var(--pt-color-theme-primary), var(--pt-color-theme-white) 60%);
+  --pt-color-theme-primary-light-4: color-mix(in srgb, var(--pt-color-theme-primary), var(--pt-color-theme-white) 80%);
+
+  --pt-color-theme-success-light-1: color-mix(in srgb, var(--pt-color-theme-success), var(--pt-color-theme-white) 20%);
+  --pt-color-theme-success-light-2: color-mix(in srgb, var(--pt-color-theme-success), var(--pt-color-theme-white) 40%);
+  --pt-color-theme-success-light-3: color-mix(in srgb, var(--pt-color-theme-success), var(--pt-color-theme-white) 60%);
+  --pt-color-theme-success-light-4: color-mix(in srgb, var(--pt-color-theme-success), var(--pt-color-theme-white) 80%);
+
+  --pt-color-theme-warning-light-1: color-mix(in srgb, var(--pt-color-theme-warning), var(--pt-color-theme-white) 20%);
+  --pt-color-theme-warning-light-2: color-mix(in srgb, var(--pt-color-theme-warning), var(--pt-color-theme-white) 40%);
+  --pt-color-theme-warning-light-3: color-mix(in srgb, var(--pt-color-theme-warning), var(--pt-color-theme-white) 60%);
+  --pt-color-theme-warning-light-4: color-mix(in srgb, var(--pt-color-theme-warning), var(--pt-color-theme-white) 80%);
+
+  --pt-color-theme-danger-light-1: color-mix(in srgb, var(--pt-color-theme-danger), var(--pt-color-theme-white) 20%);
+  --pt-color-theme-danger-light-2: color-mix(in srgb, var(--pt-color-theme-danger), var(--pt-color-theme-white) 40%);
+  --pt-color-theme-danger-light-3: color-mix(in srgb, var(--pt-color-theme-danger), var(--pt-color-theme-white) 60%);
+  --pt-color-theme-danger-light-4: color-mix(in srgb, var(--pt-color-theme-danger), var(--pt-color-theme-white) 80%);
+
+  --pt-color-theme-error-light-1: color-mix(in srgb, var(--pt-color-theme-error), var(--pt-color-theme-white) 20%);
+  --pt-color-theme-error-light-2: color-mix(in srgb, var(--pt-color-theme-error), var(--pt-color-theme-white) 40%);
+  --pt-color-theme-error-light-3: color-mix(in srgb, var(--pt-color-theme-error), var(--pt-color-theme-white) 60%);
+  --pt-color-theme-error-light-4: color-mix(in srgb, var(--pt-color-theme-error), var(--pt-color-theme-white) 80%);
+
+  --pt-color-theme-primary-dark-1: color-mix(in srgb, var(--pt-color-theme-primary), var(--pt-color-theme-black) 20%);
+  --pt-color-theme-primary-dark-2: color-mix(in srgb, var(--pt-color-theme-primary), var(--pt-color-theme-black) 40%);
+  --pt-color-theme-primary-dark-3: color-mix(in srgb, var(--pt-color-theme-primary), var(--pt-color-theme-black) 60%);
+  --pt-color-theme-primary-dark-4: color-mix(in srgb, var(--pt-color-theme-primary), var(--pt-color-theme-black) 80%);
+
+  --pt-color-theme-success-dark-1: color-mix(in srgb, var(--pt-color-theme-success), var(--pt-color-theme-black) 20%);
+  --pt-color-theme-success-dark-2: color-mix(in srgb, var(--pt-color-theme-success), var(--pt-color-theme-black) 40%);
+  --pt-color-theme-success-dark-3: color-mix(in srgb, var(--pt-color-theme-success), var(--pt-color-theme-black) 60%);
+  --pt-color-theme-success-dark-4: color-mix(in srgb, var(--pt-color-theme-success), var(--pt-color-theme-black) 80%);
+
+  --pt-color-theme-warning-dark-1: color-mix(in srgb, var(--pt-color-theme-warning), var(--pt-color-theme-black) 20%);
+  --pt-color-theme-warning-dark-2: color-mix(in srgb, var(--pt-color-theme-warning), var(--pt-color-theme-black) 40%);
+  --pt-color-theme-warning-dark-3: color-mix(in srgb, var(--pt-color-theme-warning), var(--pt-color-theme-black) 60%);
+  --pt-color-theme-warning-dark-4: color-mix(in srgb, var(--pt-color-theme-warning), var(--pt-color-theme-black) 80%);
+
+  --pt-color-theme-danger-dark-1: color-mix(in srgb, var(--pt-color-theme-danger), var(--pt-color-theme-black) 20%);
+  --pt-color-theme-danger-dark-2: color-mix(in srgb, var(--pt-color-theme-danger), var(--pt-color-theme-black) 40%);
+  --pt-color-theme-danger-dark-3: color-mix(in srgb, var(--pt-color-theme-danger), var(--pt-color-theme-black) 60%);
+  --pt-color-theme-danger-dark-4: color-mix(in srgb, var(--pt-color-theme-danger), var(--pt-color-theme-black) 80%);
+
+  --pt-color-theme-error-dark-1: color-mix(in srgb, var(--pt-color-theme-error), var(--pt-color-theme-black) 20%);
+  --pt-color-theme-error-dark-2: color-mix(in srgb, var(--pt-color-theme-error), var(--pt-color-theme-black) 40%);
+  --pt-color-theme-error-dark-3: color-mix(in srgb, var(--pt-color-theme-error), var(--pt-color-theme-black) 60%);
+  --pt-color-theme-error-dark-4: color-mix(in srgb, var(--pt-color-theme-error), var(--pt-color-theme-black) 80%);
+}

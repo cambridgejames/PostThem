@@ -37,7 +37,6 @@ export default defineConfig({
       preprocessorOptions: {
         scss: {
           api: "modern",
-          additionalData: "@use '@content/assets/mixin.scss';",
         },
       },
     },
