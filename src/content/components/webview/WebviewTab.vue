@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-import {PropType, onMounted, ref} from "vue";
+import { PropType, onMounted, ref } from "vue";
 import { HTMLWebviewElement, WebviewConfigureItem } from "@interface/common";
 
 const props = defineProps({
@@ -22,7 +22,10 @@ const webview = ref<HTMLWebviewElement>();
 const isLoadFinish = ref<boolean>(false);
 
 onMounted(() => {
-  webview.value?.addEventListener("did-finish-load", () => isLoadFinish.value = true);
+  webview.value?.addEventListener("did-finish-load", () => {
+    console.log("did-finish-load", props.configure.id);
+    isLoadFinish.value = true
+  });
 });
 
 </script>
@@ -32,9 +35,10 @@ onMounted(() => {
   width: 100%;
   height: calc(100% - 100px);
 
-  .webview, .loading {
+  .webview-slot-container, .webview, .loading {
     width: 100%;
     height: 100%;
+    overflow: hidden;
   }
 
   .loading {

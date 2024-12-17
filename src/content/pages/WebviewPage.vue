@@ -4,19 +4,31 @@
       <div v-for="(item, index) in webviewConfigure.values()" :key="index"
            class="webview-index"
            @click.left.stop="clickIndex(item.id)">
-        {{ item.id }}
+        {{ item.name }}
       </div>
     </div>
     <div class="webview-tab-container">
-      <router-view :key="$route.fullPath" :configure="currentConfigure" />
+      <router-view :v-slot="{ WebviewComponent }">
+        <keep-alive max="10">
+          <component :is="WebviewComponent" :key="currentConfigure?.id" :configure="currentConfigure" />
+        </keep-alive>
+      </router-view>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from "vue";
+import { defineComponent, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { ConfigureType, WebviewConfigureItem } from "@interface/common";
+
+import WebviewComponent from "@content/components/webview/WebviewComponent.vue";
+
+defineComponent({
+  components: {
+    WebviewComponent,
+  },
+});
 
 const router = useRouter();
 
@@ -60,6 +72,7 @@ $index-width: 320px;
     .webview-index {
       height: 50px;
       line-height: 50px;
+      padding: 0 15px;
       cursor: pointer;
 
       &:hover {

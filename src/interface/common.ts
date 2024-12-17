@@ -25,6 +25,7 @@ export interface Configure<T> {
 
 export interface WebviewConfigureItem {
   id: string;
+  name: string;
   src: string;
 }
 
