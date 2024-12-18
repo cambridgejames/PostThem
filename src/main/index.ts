@@ -11,6 +11,10 @@ function createWindow(): void {
     show: false,
     autoHideMenuBar: true,
     title: "PostThem",
+    titleBarStyle: "hidden",
+    titleBarOverlay: {
+      height: 40,
+    },
     icon,
     webPreferences: {
       webviewTag: true,

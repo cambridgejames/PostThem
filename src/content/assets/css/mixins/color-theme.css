@@ -20,6 +20,8 @@
   --pt-color-theme-white: var(--pt-color-define-black);
   --pt-color-theme-gray: var(--pt-color-define-gray);
   --pt-color-theme-black: var(--pt-color-define-white);
+  --pt-color-theme-title: #2b2d30;
+  --pt-color-theme-background: #2b2d30;
 }
 
 /* PostThemLight颜色主题 颜色定义 */
@@ -32,6 +34,8 @@
   --pt-color-theme-white: var(--pt-color-define-white);
   --pt-color-theme-gray: var(--pt-color-define-gray);
   --pt-color-theme-black: var(--pt-color-define-black);
+  --pt-color-theme-title: #f0f0f0;
+  --pt-color-theme-background: #ffffff;
 }
 
 :root {

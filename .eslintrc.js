@@ -36,7 +36,18 @@ module.exports = {
     "operator-linebreak": ["error", "before"],
     "quote-props": ["error", "as-needed"],
     "space-before-function-paren": 0,
-    "vue/first-attribute-linebreak": ["error", "never"],
+    "vue/html-closing-bracket-newline": ["error", {
+      singleline: "never",
+      multiline: "never",
+      selfClosingTag: {
+        singleline: "never",
+        multiline: "never",
+      },
+    }],
+    "vue/first-attribute-linebreak": ["error", {
+      singleline: "beside",
+      multiline: "beside",
+    }],
     "vue/max-attributes-per-line": "off",
     indent: ["error", 2],
     quotes: ["error", "double"],

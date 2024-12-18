@@ -2,7 +2,7 @@
   <div class="webview-page">
     <div ref="webviewIndexContainer" class="webview-index-container">
       <div v-for="(item, index) in webviewConfigure.values()" :key="index"
-           class="webview-index"
+           class="webview-index non-selectable"
            @click.left.stop="clickIndex(item.id)">
         {{ item.name }}
       </div>

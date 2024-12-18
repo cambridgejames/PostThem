@@ -43,4 +43,6 @@
 :root {
   --pt-font-text-normal: "HarmonyOS Sans";
   --pt-size-text-normal: 14px;
+  --pt-header-height: 40px;
+  --pt-header-icon-size: 20px;
 }
