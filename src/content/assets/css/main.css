@@ -12,6 +12,7 @@ html, body, #app {
   overflow: hidden;
   font-family: var(--pt-font-text-normal), "Microsoft YaHei UI", sans-serif;
   font-size: var(--pt-size-text-normal);
+  color: var(--pt-color-theme-text-color);
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -22,4 +23,9 @@ html, body, #app {
   -moz-user-select: none;
   -ms-user-select: none;
   -webkit-user-select: none;
+}
+
+.flex-item-frozen-size {
+  flex-grow: 0;
+  flex-shrink: 0;
 }

@@ -1,8 +1,10 @@
 <template>
   <div class="webview-container">
     <webview v-show="isLoadFinish" ref="webview" :key="props.configure.id" class="webview"
-             :src="props.configure.src" :partition="`persist:${props.configure.id}`"/>
-    <div v-show="!isLoadFinish" class="loading">loading</div>
+             :src="props.configure.src" :partition="`persist:${props.configure.id}`" />
+    <div v-show="!isLoadFinish" class="loading">
+      loading
+    </div>
   </div>
   <div>{{ $route.fullPath }}</div>
 </template>
@@ -15,7 +17,7 @@ const props = defineProps({
   configure: {
     type: Object as PropType<WebviewConfigureItem>,
     required: true,
-  }
+  },
 });
 
 const webview = ref<HTMLWebviewElement>();
@@ -24,7 +26,7 @@ const isLoadFinish = ref<boolean>(false);
 onMounted(() => {
   webview.value?.addEventListener("did-finish-load", () => {
     console.log("did-finish-load", props.configure.id);
-    isLoadFinish.value = true
+    isLoadFinish.value = true;
   });
 });
 
