@@ -44,6 +44,7 @@ module.exports = {
         multiline: "never",
       },
     }],
+    "vue/singleline-html-element-content-newline": ["off"],
     "vue/first-attribute-linebreak": ["error", {
       singleline: "beside",
       multiline: "beside",

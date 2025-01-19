@@ -18,17 +18,11 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, reactive, ref } from "vue";
+import { reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { ConfigureType, WebviewConfigureItem } from "@interface/common";
 
 import WebviewComponent from "@content/components/webview/WebviewComponent.vue";
-
-defineComponent({
-  components: {
-    WebviewComponent,
-  },
-});
 
 const router = useRouter();
 
@@ -48,7 +42,7 @@ window.util.SettingsUtils.getConfigure("$.data", ConfigureType.WEBVIEW).then((da
  */
 const clickIndex = (id: string) => {
   currentConfigure.value = webviewConfigure.get(id);
-  router.push({name: `WEBVIEW_${id}`});
+  router.push({ name: `WEBVIEW_${id}` });
 };
 </script>
 
@@ -76,7 +70,7 @@ $index-width: 320px;
       cursor: pointer;
 
       &:hover {
-        background-color: #eee;
+        background-color: var(--pt-color-theme-primary-hover);
       }
     }
   }

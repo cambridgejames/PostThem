@@ -21,13 +21,19 @@
   --pt-color-theme-gray: var(--pt-color-define-gray);
   --pt-color-theme-black: var(--pt-color-define-white);
   --pt-color-theme-title: #2b2d30;
+  --pt-color-theme-text-color: #e8e8e8;
   --pt-color-theme-background: #2b2d30;
+  --pt-color-theme-background-normal: #1e1f22;
+  --pt-color-theme-icon-fill: #ced0d6;
+  --pt-color-theme-icon-fill-active: #ffffff;
+  --pt-color-theme-primary-hover: #393b40;
+  --pt-color-theme-primary-border: #43454a;
 }
 
 /* PostThemLight颜色主题 颜色定义 */
 :root {
   --pt-color-theme-primary: var(--pt-color-define-blue);
-  --pt-color-theme-success-light: var(--pt-color-define-green);
+  --pt-color-theme-success: var(--pt-color-define-green);
   --pt-color-theme-warning: var(--pt-color-define-yellow);
   --pt-color-theme-danger: var(--pt-color-define-orange);
   --pt-color-theme-error: var(--pt-color-define-red);
@@ -35,7 +41,13 @@
   --pt-color-theme-gray: var(--pt-color-define-gray);
   --pt-color-theme-black: var(--pt-color-define-black);
   --pt-color-theme-title: #f0f0f0;
-  --pt-color-theme-background: #ffffff;
+  --pt-color-theme-text-color: #252b3a;
+  --pt-color-theme-background: #f7f8fa;
+  --pt-color-theme-background-normal: #ffffff;
+  --pt-color-theme-icon-fill: #6c707e;
+  --pt-color-theme-icon-fill-active: #ffffff;
+  --pt-color-theme-primary-hover: #ebecf0;
+  --pt-color-theme-primary-border: #e1e2e8;
 }
 
 :root {
