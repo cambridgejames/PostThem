@@ -1,7 +1,7 @@
 import { contextBridge } from "electron";
 import { electronAPI } from "@electron-toolkit/preload";
-
 import { utils } from "@preload/util";
+import { plugins } from "@preload/plugin";
 
 // Custom APIs for content
 const api = {};
@@ -14,6 +14,7 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld("electron", electronAPI);
     contextBridge.exposeInMainWorld("api", api);
     contextBridge.exposeInMainWorld("util", utils);
+    contextBridge.exposeInMainWorld("plugins", plugins);
   } catch (error) {
     console.error(error);
   }
@@ -22,4 +23,8 @@ if (process.contextIsolated) {
   window.electron = electronAPI;
   // @ts-ignore (define in dts)
   window.api = api;
+  // @ts-ignore (define in dts)
+  window.util = utils;
+  // @ts-ignore (define in dts)
+  window.plugins = plugins;
 }
