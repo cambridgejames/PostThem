@@ -6,7 +6,7 @@ type CreateProxy = <T extends (...args: any[]) => any>(target: T, aspectName: st
  * @param target 目标方法
  * @param aspectName 切面名称
  */
-const createProxy: CreateProxy = <T extends (...args: any[]) => any> (target: T, aspectName: string): T => {
+const createProxy: CreateProxy = <T extends (...args: any[]) => any>(target: T, aspectName: string): T => {
   return ((...args: Parameters<T>): ReturnType<T> => {
     console.log(`Before calling target method, name: ${aspectName}, args: ${JSON.stringify(args)}`);
     const result = target(...args);
