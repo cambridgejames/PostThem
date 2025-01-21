@@ -1,7 +1,7 @@
 const onMount = () => {
-  console.log("Hello");
+  console.log("Hello, test plugin!");
 };
 
-export default {
+module.exports = {
   onMount,
 };

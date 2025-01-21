@@ -29,7 +29,7 @@ export const loadPlugins: LoadPlugins = async (): Promise<void> => {
       continue;
     }
     console.log(`Found plugin in folder: '${currentManifest.name}'`);
-    PLUGIN_MANAGER.register(currentManifest.name);
+    PLUGIN_MANAGER.register(currentManifest, path.join(PLUGIN_DIR_NAME, pluginDir));
   }
 };
 
