@@ -4,5 +4,8 @@
   "version": "0.0.1",
   "description": "Test description.",
   "uniqueId": "postThem.plugins.testPlugin",
-  "entry": "index.js"
+  "entry": {
+    "preload": "index.js",
+    "webview": "index.html"
+  }
 }
