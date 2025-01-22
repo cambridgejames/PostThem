@@ -12,6 +12,7 @@ export interface PluginManifest {
   description: string;
   uniqueId: string;
   entry: PluginEntry;
+  aspect?: PluginAspect;
 }
 
 /**
@@ -20,6 +21,14 @@ export interface PluginManifest {
 export interface PluginEntry {
   preload?: string;
   web?: string;
+}
+
+/**
+ * 插件依赖类型定义
+ */
+export interface PluginAspect {
+  require?: Array<string>;
+  provide?: Array<string>;
 }
 
 /**
@@ -38,6 +47,7 @@ enum ManifestCheckMessage {
   ENTRY_FILE_NOT_FOUND = "Configured entry file \"{0}\" not found.",
   ENTRY_FILE_PATH_ILLEGAL = "Configured entry file \"{0}\" illegal.",
   ENTRY_NUMBER_ILLEGAL = "At least 1 entry file needs to be configured, 0 have already been configured.",
+  ASPECT_NUMBER_ILLEGAL = "At least 1 API must be configured in require or privileged when aspect is configured.",
 }
 
 /**
@@ -70,6 +80,11 @@ export const checkAndParseManifest = async (manifestContent: object, pluginPath:
   const entryCheckResult = await checkEntry(manifest.entry, pluginPath);
   if (!entryCheckResult.result) {
     return entryCheckResult;
+  }
+  // 校验插件依赖配置
+  const aspectCheckResult = checkAspect(manifest.aspect);
+  if (!aspectCheckResult.result) {
+    return aspectCheckResult;
   }
   return buildManifestCheckResult(true, ManifestCheckMessage.SUCCESS, [], manifest);
 };
@@ -107,6 +122,20 @@ const checkEntry = async (entry: PluginEntry, pluginPath: string): Promise<Manif
     return buildManifestCheckResult(false, ManifestCheckMessage.ENTRY_NUMBER_ILLEGAL);
   }
   return buildManifestCheckResult(true, ManifestCheckMessage.SUCCESS);
+};
+
+/**
+ * 校验插件依赖定义
+ *
+ * @param aspect 插件依赖配置
+ */
+const checkAspect = (aspect: PluginAspect | undefined): ManifestCheckResult => {
+  if (!aspect) {
+    return buildManifestCheckResult(true, ManifestCheckMessage.SUCCESS);
+  }
+  return ((aspect.require?.length || 0) + (aspect.provide?.length || 0) > 0)
+    ? buildManifestCheckResult(true, ManifestCheckMessage.SUCCESS)
+    : buildManifestCheckResult(false, ManifestCheckMessage.ASPECT_NUMBER_ILLEGAL);
 };
 
 /**

@@ -5,14 +5,14 @@ import * as path from "node:path";
 /**
  * 插件preload入口文件类型定义
  */
-abstract class PluginPreloadEntry {
-  abstract onMount(): void;
+interface PluginPreloadEntry {
+  onMount?(): void;
 }
 
 /**
  * 已加载的插件详细信息
  */
-class ManagedPlugin implements PluginPreloadEntry{
+class ManagedPlugin implements PluginPreloadEntry {
   public readonly manifest: PluginManifest;
   private readonly preloadEntry?: PluginPreloadEntry;
   // private readonly webEntry?: string;
@@ -32,7 +32,7 @@ class ManagedPlugin implements PluginPreloadEntry{
   }
 
   async onMount(): Promise<void> {
-    setTimeout(() => this.preloadEntry?.onMount(), 1);
+    setTimeout(() => this.preloadEntry?.onMount?.(), 1);
   }
 }
 
