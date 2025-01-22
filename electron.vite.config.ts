@@ -1,5 +1,5 @@
 import { resolve } from "path";
-import { defineConfig, externalizeDepsPlugin } from "electron-vite";
+import { bytecodePlugin, defineConfig, externalizeDepsPlugin } from "electron-vite";
 import vue from "@vitejs/plugin-vue";
 
 export default defineConfig({
@@ -11,6 +11,7 @@ export default defineConfig({
   preload: {
     plugins: [
       externalizeDepsPlugin(),
+      bytecodePlugin(),
     ],
     resolve: {
       alias: {

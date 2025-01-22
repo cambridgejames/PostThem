@@ -1,0 +1,11 @@
+{
+  "name": "示例插件",
+  "author": "PostThem",
+  "version": "0.0.1",
+  "description": "An demo plugin used to demonstrate the basic functions of the plugin system",
+  "uniqueId": "postThem.plugins.demoPlugin",
+  "entry": {
+    "preload": "index.js",
+    "webview": "index.html"
+  }
+}

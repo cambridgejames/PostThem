@@ -1,7 +1,7 @@
 import * as path from "path";
 import * as fs from "fs";
 
-const IS_DEVELOPMENT: boolean = process.env.NODE_ENV !== "production";
+const IS_DEVELOPMENT: boolean = process.env.NODE_ENV === "development";
 const RESOURCE_DIR_NAME: string = "resources";
 const CONFIG_FILE_ENCODING = "utf-8";
 
@@ -58,6 +58,7 @@ export const readDir = (pathToDir: string, filter = "(?:)"): Promise<Array<strin
     fs.readdir(getConfigPath(pathToDir), (error, data: Array<string>) => {
       if (error) {
         reject(error);
+        return;
       }
       const regex = new RegExp(filter);
       resolve(data.filter(value => regex.test(value)));

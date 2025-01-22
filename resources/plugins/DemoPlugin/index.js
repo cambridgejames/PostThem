@@ -1,5 +1,5 @@
 const onMount = () => {
-  console.log("Hello, test plugin!");
+  console.log("Hello, demo plugin!");
 };
 
 module.exports = {
