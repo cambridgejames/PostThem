@@ -1,25 +1,13 @@
-import { contextBridge } from "electron";
-import { electronAPI } from "@electron-toolkit/preload";
+import * as ApiExposeUtil from "@preload/api/apiExposeUtil";
 
 import { utils } from "@preload/util";
+import { plugins } from "@preload/plugin";
 
-// Custom APIs for content
-const api = {};
+ApiExposeUtil.exposeApiForRender("util", utils);
+ApiExposeUtil.exposeApiForRender("plugins", plugins);
 
-// Use `contextBridge` APIs to expose Electron APIs to
-// content only if context isolation is enabled, otherwise
-// just add to the DOM global.
-if (process.contextIsolated) {
-  try {
-    contextBridge.exposeInMainWorld("electron", electronAPI);
-    contextBridge.exposeInMainWorld("api", api);
-    contextBridge.exposeInMainWorld("util", utils);
-  } catch (error) {
-    console.error(error);
-  }
-} else {
-  // @ts-ignore (define in dts)
-  window.electron = electronAPI;
-  // @ts-ignore (define in dts)
-  window.api = api;
-}
+const sdkApi = {
+  aspect: plugins.AspectUtil,
+};
+
+ApiExposeUtil.exposeApiForPreload("sdk", sdkApi);

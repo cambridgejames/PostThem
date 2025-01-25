@@ -4,7 +4,10 @@
     "electron.vite.config.*",
     "src/main/**/*",
     "src/preload/**/*",
-    "src/interface/**/*"
+    "src/preload/*.d.ts",
+    "src/interface/**/*",
+    "resources/sdk/**/*",
+    "resources/sdk/*.d.ts"
   ],
   "compilerOptions": {
     "target": "esnext",
@@ -25,14 +28,17 @@
     "baseUrl": ".",
     "paths": {
       "@preload/*": [
-        "src/preload/*"
+        "src/preload/*",
       ],
       "@interface/*": [
-        "src/interface/*"
+        "src/interface/*",
+      ],
+      "@sdk/*": [
+        "resources/sdk/*",
       ],
     },
     "types": [
-      "electron-vite/node"
+      "electron-vite/node",
     ],
   },
 }

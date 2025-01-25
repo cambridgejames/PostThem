@@ -25,8 +25,8 @@ module.exports = {
       exports: "always-multiline",
       functions: "never",
     }],
-    "no-console": process.env.NODE_ENV === "production" ? "warn" : "off",
-    "no-debugger": process.env.NODE_ENV === "production" ? "warn" : "off",
+    "no-console": process.env.NODE_ENV === "development" ? "off" : "warn",
+    "no-debugger": process.env.NODE_ENV === "development" ? "off" : "warn",
     "no-empty": "error",
     "no-unused-vars": "off",
     "object-curly-spacing": ["error", "always", {

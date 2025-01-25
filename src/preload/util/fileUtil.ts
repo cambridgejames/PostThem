@@ -1,7 +1,7 @@
 import * as path from "path";
 import * as fs from "fs";
 
-const IS_DEVELOPMENT: boolean = process.env.NODE_ENV !== "production";
+const IS_DEVELOPMENT: boolean = process.env.NODE_ENV === "development";
 const RESOURCE_DIR_NAME: string = "resources";
 const CONFIG_FILE_ENCODING = "utf-8";
 
@@ -58,6 +58,7 @@ export const readDir = (pathToDir: string, filter = "(?:)"): Promise<Array<strin
     fs.readdir(getConfigPath(pathToDir), (error, data: Array<string>) => {
       if (error) {
         reject(error);
+        return;
       }
       const regex = new RegExp(filter);
       resolve(data.filter(value => regex.test(value)));
@@ -68,7 +69,7 @@ export const readDir = (pathToDir: string, filter = "(?:)"): Promise<Array<strin
 /**
  * 判断指定目录或文件是否存在
  *
- * @param pathToFile
+ * @param pathToFile 文件URL
  */
 export const isExists = async (pathToFile: string | Array<string>): Promise<boolean> => {
   const filePaths: Array<string> = typeof pathToFile === "string" ? [pathToFile] : pathToFile;
@@ -77,4 +78,13 @@ export const isExists = async (pathToFile: string | Array<string>): Promise<bool
     solution &&= fs.existsSync(getConfigPath(currentFilePath));
   }
   return solution;
+};
+
+/**
+ * 校验文件路径是否合法
+ *
+ * @param pathToTarget 文件或目录URL
+ */
+export const isLegal = (pathToTarget: string): boolean => {
+  return !!pathToTarget && !pathToTarget.includes("..");
 };
