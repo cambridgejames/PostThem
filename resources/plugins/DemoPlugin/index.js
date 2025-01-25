@@ -1,7 +1,12 @@
-const onMount = () => {
-  console.log("Hello, demo plugin!");
+const beforeAspect = value => {
+  return [`plugin ${value}`];
 };
 
-module.exports = {
-  onMount,
-};
+class DemoPlugin {
+  onMount() {
+    console.log("Hello, demo plugin!");
+    window.sdk.aspect.registerBefore("postThem.homePage.sayHello", beforeAspect);
+  }
+}
+
+module.exports = new DemoPlugin();

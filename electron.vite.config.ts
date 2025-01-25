@@ -17,6 +17,7 @@ export default defineConfig({
       alias: {
         "@preload": resolve(__dirname, "./src/preload"),
         "@interface": resolve(__dirname, "./src/interface"),
+        "@sdk": resolve(__dirname, "./resources/sdk"),
       },
     },
   },

@@ -12,7 +12,7 @@ export interface PluginManifest {
   description: string;
   uniqueId: string;
   entry: PluginEntry;
-  aspect?: PluginAspect;
+  aspect: PluginAspect;
 }
 
 /**
@@ -27,8 +27,8 @@ export interface PluginEntry {
  * 插件依赖类型定义
  */
 export interface PluginAspect {
-  require?: Array<string>;
-  provide?: Array<string>;
+  require: Array<string>;
+  provide: Array<string>;
 }
 
 /**
@@ -82,7 +82,7 @@ export const checkAndParseManifest = async (manifestContent: object, pluginPath:
     return entryCheckResult;
   }
   // 校验插件依赖配置
-  const aspectCheckResult = checkAspect(manifest.aspect);
+  const aspectCheckResult = checkAspect(manifest);
   if (!aspectCheckResult.result) {
     return aspectCheckResult;
   }
@@ -127,13 +127,16 @@ const checkEntry = async (entry: PluginEntry, pluginPath: string): Promise<Manif
 /**
  * 校验插件依赖定义
  *
- * @param aspect 插件依赖配置
+ * @param manifest 插件配置
  */
-const checkAspect = (aspect: PluginAspect | undefined): ManifestCheckResult => {
-  if (!aspect) {
+const checkAspect = (manifest: PluginManifest): ManifestCheckResult => {
+  if (!manifest.aspect) {
+    manifest.aspect = { require: [], provide: []};
     return buildManifestCheckResult(true, ManifestCheckMessage.SUCCESS);
   }
-  return ((aspect.require?.length || 0) + (aspect.provide?.length || 0) > 0)
+  manifest.aspect.provide = manifest.aspect.provide || [];
+  manifest.aspect.require = manifest.aspect.require || [];
+  return ((manifest.aspect.require.length) + (manifest.aspect.provide.length) > 0)
     ? buildManifestCheckResult(true, ManifestCheckMessage.SUCCESS)
     : buildManifestCheckResult(false, ManifestCheckMessage.ASPECT_NUMBER_ILLEGAL);
 };

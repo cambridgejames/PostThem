@@ -8,7 +8,6 @@ import {
 
 import * as path from "node:path";
 
-const PLUGIN_DIR_NAME: string = "plugins";
 const PLUGIN_MANIFEST_FILE_NAME: string = "manifest.json";
 const PLUGIN_REQUIRED_FILES: string[] = [
   PLUGIN_MANIFEST_FILE_NAME,
@@ -22,13 +21,13 @@ type LoadPlugins = () => Promise<void>;
  */
 export const loadPlugins: LoadPlugins = async (): Promise<void> => {
   console.log("Start load plugins.");
-  const pluginDirs: string[] = await readDir(PLUGIN_DIR_NAME);
+  const pluginDirs: string[] = await readDir(PLUGIN_MANAGER.getPluginRoot());
   for (const pluginDir of pluginDirs) {
     const currentManifest: PluginManifest | null = await checkAndLoadPluginManifest(pluginDir);
     if (!currentManifest) {
       continue;
     }
-    PLUGIN_MANAGER.register(currentManifest, path.join(PLUGIN_DIR_NAME, pluginDir));
+    PLUGIN_MANAGER.register(currentManifest, pluginDir);
   }
   console.log("Plugins loading completed.");
 };
@@ -39,14 +38,14 @@ export const loadPlugins: LoadPlugins = async (): Promise<void> => {
  * @param pluginDirName 插件根目录
  */
 const checkAndLoadPluginManifest = async (pluginDirName: string): Promise<PluginManifest | null> => {
-  const pathToPluginDir = path.join(PLUGIN_DIR_NAME, pluginDirName);
+  const pathToPluginDir = path.join(PLUGIN_MANAGER.getPluginRoot(), pluginDirName);
   const currentPluginFiles: string[] = await readDir(pathToPluginDir);
   for (const requiredPluginFile of PLUGIN_REQUIRED_FILES) {
     if (!currentPluginFiles.includes(requiredPluginFile)) {
       return null;
     }
   }
-  const manifestContent = JSON.parse(await readFile(path.join(PLUGIN_DIR_NAME, pluginDirName, PLUGIN_MANIFEST_FILE_NAME)));
+  const manifestContent = JSON.parse(await readFile(path.join(PLUGIN_MANAGER.getPluginRoot(), pluginDirName, PLUGIN_MANIFEST_FILE_NAME)));
   const manifestCheckResult: ManifestCheckResult = await checkAndParseManifest(manifestContent, pathToPluginDir);
   if (!manifestCheckResult.result) {
     console.log(`Check plugin '${pluginDirName}', failed: ${manifestCheckResult.message}`);
