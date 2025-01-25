@@ -1,5 +1,5 @@
 import { PluginManifest } from "@preload/plugin/interface/manifestInterface";
-import { BeforeAspect } from "@sdk/postThemSdk";
+import { BeforeAspect, AfterAspect } from "@sdk/index";
 
 import * as FileUtil from "@preload/util/fileUtil";
 import * as StringUtil from "@preload/util/stringUtil";
@@ -43,9 +43,9 @@ class ManagedPlugin implements PluginPreloadEntry {
   }
 }
 
-export interface NamedBeforeAspect {
+export interface NamedAspect<T extends BeforeAspect | AfterAspect> {
   pluginId: string;
-  aspect: BeforeAspect;
+  aspect: T;
 }
 
 /**
@@ -54,7 +54,8 @@ export interface NamedBeforeAspect {
 export class PluginManager {
   private static INSTANCE: PluginManager;
   private readonly managerPluginMap: Map<string, ManagedPlugin> = new Map();
-  private readonly beforeAspectMap: Map<string, Array<NamedBeforeAspect>> = new Map();
+  private readonly beforeAspectMap: Map<string, Array<NamedAspect<BeforeAspect>>> = new Map();
+  private readonly afterAspectMap: Map<string, Array<NamedAspect<AfterAspect>>> = new Map();
 
   /**
    * 获取插件管理器实例
@@ -96,8 +97,8 @@ export class PluginManager {
   /**
    * 注册Before切面处理方法
    *
-   * @param aspectName 切点名称
-   * @param aspectMethod 切面方法
+   * @param {string} aspectName 切点名称
+   * @param {BeforeAspect} aspectMethod 切面方法
    */
   public registerBefore(aspectName: string, aspectMethod: BeforeAspect): void {
     const currentPlugin = this.findByCallStack(3);
@@ -105,7 +106,7 @@ export class PluginManager {
       console.warn(`Plugin "${currentPlugin?.manifest.uniqueId}" has no permission to access aspect "${aspectName}".`);
       return;
     }
-    const beforeAspects: Array<NamedBeforeAspect> = this.beforeAspectMap.get(aspectName) || [];
+    const beforeAspects: Array<NamedAspect<BeforeAspect>> = this.beforeAspectMap.get(aspectName) || [];
     beforeAspects.push({
       pluginId: currentPlugin.manifest.uniqueId,
       aspect: aspectMethod,
@@ -116,11 +117,41 @@ export class PluginManager {
   /**
    * 获取Before切面处理方法
    *
-   * @param aspectName 切点名称
-   * @return {NamedBeforeAspect} Before切面处理方法
+   * @param {string} aspectName 切点名称
+   * @return {Array<NamedAspect<BeforeAspect>>} Before切面处理方法
    */
-  public getBefore(aspectName: string): Array<NamedBeforeAspect> {
+  public getBefore(aspectName: string): Array<NamedAspect<BeforeAspect>> {
     return this.beforeAspectMap.get(aspectName) || [];
+  }
+
+  /**
+   * 注册After切面处理方法
+   *
+   * @param {string} aspectName 切点名称
+   * @param {AfterAspect} aspectMethod 切面方法
+   */
+  public registerAfter(aspectName: string, aspectMethod: AfterAspect): void {
+    const currentPlugin = this.findByCallStack(3);
+    if (!currentPlugin?.manifest.aspect.require.includes(aspectName)) {
+      console.warn(`Plugin "${currentPlugin?.manifest.uniqueId}" has no permission to access aspect "${aspectName}".`);
+      return;
+    }
+    const afterAspects: Array<NamedAspect<AfterAspect>> = this.afterAspectMap.get(aspectName) || [];
+    afterAspects.push({
+      pluginId: currentPlugin.manifest.uniqueId,
+      aspect: aspectMethod,
+    });
+    this.afterAspectMap.set(aspectName, afterAspects);
+  }
+
+  /**
+   * 获取After切面处理方法
+   *
+   * @param {string} aspectName 切点名称
+   * @return {Array<NamedAspect<AfterAspect>>} After切面处理方法
+   */
+  public getAfter(aspectName: string): Array<NamedAspect<AfterAspect>> {
+    return this.afterAspectMap.get(aspectName) || [];
   }
 
   /**

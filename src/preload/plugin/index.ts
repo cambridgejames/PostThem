@@ -1,5 +1,5 @@
 import { AspectUtil } from "@preload/plugin/util/aspectUtil";
-import { AspectUtilsType } from "@sdk/postThemSdk";
+import { AspectUtilsType } from "@sdk/index";
 import { PluginUtil, PluginUtilType } from "@preload/plugin/util/pluginUtil";
 
 export interface Plugins {
