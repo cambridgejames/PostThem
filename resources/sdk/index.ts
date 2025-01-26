@@ -1,3 +1,9 @@
+export interface ProceedingTarget<T extends (...args: any[]) => any> {
+  getAspectName(): string;
+  getArgs(): Parameters<T>;
+  proceed(): ReturnType<T>;
+}
+
 /**
  * Before切面处理函数
  *
@@ -15,6 +21,8 @@
  * };
  */
 export type BeforeAspect = <T extends any[]>(...args: T) => T;
+
+export type AroundAspect = <T extends (...args: any[]) => any>(target: ProceedingTarget<T>) => ReturnType<T>;
 
 /**
  * After切面处理函数
@@ -76,6 +84,8 @@ export type CreateAspectProxy = <T extends (...args: any[]) => any>(target: T, a
  */
 export type RegisterBefore = (aspectName: string, aspectMethod: BeforeAspect) => void;
 
+export type RegisterAround = (aspectName: string, aspectMethod: AroundAspect) => void;
+
 /**
  * 注册After切面处理函数
  *
@@ -102,5 +112,6 @@ export type RegisterAfter = (aspectName: string, aspectMethod: AfterAspect) => v
 export interface AspectUtilsType {
   createAspectProxy: CreateAspectProxy;
   registerBefore: RegisterBefore;
+  registerAround: RegisterAround;
   registerAfter: RegisterAfter;
 }
