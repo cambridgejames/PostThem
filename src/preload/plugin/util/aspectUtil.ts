@@ -1,14 +1,47 @@
-import { PluginManager } from "@preload/plugin/pluginManager";
+import { NamedAspect, PluginManager } from "@preload/plugin/pluginManager";
 import {
+  ProceedingTarget,
   BeforeAspect,
+  AroundAspect,
   AfterAspect,
   CreateAspectProxy,
   RegisterBefore,
+  RegisterAround,
   RegisterAfter,
   AspectUtilsType,
 } from "@sdk/index";
 
 const PLUGIN_MANAGER: PluginManager = PluginManager.getInstance();
+
+/**
+ * 切面目标函数代理类
+ */
+class ProceedingTargetImpl<T extends (...args: any[]) => any> implements ProceedingTarget<T> {
+  private readonly _aspectName: string;
+  private readonly _args: Parameters<T>;
+  private readonly _target: T;
+  private readonly _aspects: Array<NamedAspect<AroundAspect>>;
+
+  public constructor(aspectName: string, args: Parameters<T>, target: T, aspects: Array<NamedAspect<AroundAspect>>) {
+    this._aspectName = aspectName;
+    this._args = args;
+    this._target = target;
+    this._aspects = aspects;
+  }
+
+  public getAspectName(): string {
+    return this._aspectName;
+  }
+
+  public getArgs(): Parameters<T> {
+    return this._args;
+  }
+
+  public proceed(): ReturnType<T> {
+    return this._aspects.length === 0 ? this._target.call(this, this._args)
+      : this._aspects[0].aspect(new ProceedingTargetImpl(this._aspectName, this._args, this._target, this._aspects.slice(1)));
+  }
+}
 
 /**
  * 将函数注册为切面函数
@@ -19,7 +52,7 @@ const PLUGIN_MANAGER: PluginManager = PluginManager.getInstance();
 const createAspectProxy: CreateAspectProxy = <T extends (...args: any[]) => any>(target: T, aspectName: string): T => {
   return ((...args: Parameters<T>): ReturnType<T> => {
     const realArgs: Parameters<T> = doBefore(aspectName, args);
-    const result: ReturnType<T> = target(...realArgs);
+    const result: ReturnType<T> = doAround(aspectName, target, realArgs);
     return doAfter(aspectName, result);
   }) as T;
 };
@@ -43,6 +76,17 @@ const doBefore = <T extends any[]>(aspectName: string, args: T): T => {
     }
     return args;
   }, args);
+};
+
+/**
+ * 执行Around切面处理函数
+ *
+ * @param aspectName 切点名称
+ * @param target 目标函数
+ * @param args 目标函数入参
+ */
+const doAround = <T extends (...args: any[]) => any>(aspectName: string, target: T, args: Parameters<T>): ReturnType<T> => {
+  return new ProceedingTargetImpl(aspectName, args, target, PLUGIN_MANAGER.getAround(aspectName)).proceed();
 };
 
 /**
@@ -73,6 +117,16 @@ const registerBefore: RegisterBefore = (aspectName: string, aspectMethod: Before
 };
 
 /**
+ * 注册Around切面处理函数
+ *
+ * @param aspectName 切点名称
+ * @param aspectMethod 切面函数
+ */
+const registerAround: RegisterAround = (aspectName: string, aspectMethod: AroundAspect): void => {
+  PLUGIN_MANAGER.registerAround(aspectName, aspectMethod);
+};
+
+/**
  * 注册After切面处理函数
  *
  * @param aspectName 切点名称
@@ -85,5 +139,6 @@ const registerAfter: RegisterAfter = (aspectName: string, aspectMethod: AfterAsp
 export const AspectUtil: AspectUtilsType = {
   createAspectProxy,
   registerBefore,
+  registerAround,
   registerAfter,
 };
