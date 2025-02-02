@@ -1,6 +1,28 @@
+/**
+ * 目标函数代理类型
+ *
+ * @template T 目标函数的类型
+ */
 export interface ProceedingTarget<T extends (...args: any[]) => any> {
+  /**
+   * 获取切点名称
+   *
+   * @return {string} 切点名称
+   */
   getAspectName(): string;
+
+  /**
+   * 获取目标函数的入参
+   *
+   * @return {Parameters<T>} 目标函数的入参
+   */
   getArgs(): Parameters<T>;
+
+  /**
+   * 执行目标函数的原函数
+   *
+   * @return {ReturnType<T>} 目标函数的返回值
+   */
   proceed(): ReturnType<T>;
 }
 
@@ -22,6 +44,27 @@ export interface ProceedingTarget<T extends (...args: any[]) => any> {
  */
 export type BeforeAspect = <T extends any[]>(...args: T) => T;
 
+/**
+ * Around切面处理函数
+ *
+ *
+ * 用于插件系统中的切面处理函数，在目标函数执行之前改变其入参。
+ * 如果对同一个切点注册了多个Around切面处理函数，它们将按照注册的顺序依次执行。
+ *
+ * 必须在切面处理函数中调用`target.proceed()`函数，否则会影响原函数及其他切面处理函数的运行。
+ *
+ * @template T 目标函数的类型
+ * @param {ProceedingTarget<T>} target 目标函数代理对象
+ * @return {ReturnType<T>} 处理后的返回值
+ *
+ * @example
+ * const logFunction: AroundAspect = <T extends (...args: any[]) => any>(target: ProceedingTarget<T>): ReturnType<T> => {
+ *   console.log("参数：", ...target.getArgs());
+ *   const returnValue = target.proceed();
+ *   console.log("返回值：", returnValue);
+ *   return returnValue;
+ * }
+ */
 export type AroundAspect = <T extends (...args: any[]) => any>(target: ProceedingTarget<T>) => ReturnType<T>;
 
 /**
@@ -84,6 +127,27 @@ export type CreateAspectProxy = <T extends (...args: any[]) => any>(target: T, a
  */
 export type RegisterBefore = (aspectName: string, aspectMethod: BeforeAspect) => void;
 
+/**
+ * Around切面处理函数
+ *
+ *
+ * 用于插件系统中的切面处理函数，在目标函数执行之前改变其入参。
+ * 如果对同一个切点注册了多个Around切面处理函数，它们将按照注册的顺序依次执行。
+ *
+ * 为了保证切面处理函数能够按照插件加载顺序执行，请尽量在插件的生命周期函数`onMount()`中注册切面处理函数。
+ *
+ * @param {string} aspectName 切点名称
+ * @param {AroundAspect} aspectMethod Around切面处理函数
+ *
+ * @example
+ * const logFunction: AroundAspect = <T extends (...args: any[]) => any>(target: ProceedingTarget<T>): ReturnType<T> => {
+ *   console.log("参数：", ...target.getArgs());
+ *   const returnValue = target.proceed();
+ *   console.log("返回值：", returnValue);
+ *   return returnValue;
+ * }
+ * window.sdk.aspect.registerAround("example.joinString", logFunction);
+ */
 export type RegisterAround = (aspectName: string, aspectMethod: AroundAspect) => void;
 
 /**

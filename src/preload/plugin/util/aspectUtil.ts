@@ -1,5 +1,6 @@
 import { NamedAspect, PluginManager } from "@preload/plugin/pluginManager";
 import {
+  ProceedingTarget,
   BeforeAspect,
   AroundAspect,
   AfterAspect,
@@ -7,11 +8,14 @@ import {
   RegisterBefore,
   RegisterAround,
   RegisterAfter,
-  AspectUtilsType, ProceedingTarget,
+  AspectUtilsType,
 } from "@sdk/index";
 
 const PLUGIN_MANAGER: PluginManager = PluginManager.getInstance();
 
+/**
+ * 切面目标函数代理类
+ */
 class ProceedingTargetImpl<T extends (...args: any[]) => any> implements ProceedingTarget<T> {
   private readonly _aspectName: string;
   private readonly _args: Parameters<T>;
@@ -34,7 +38,7 @@ class ProceedingTargetImpl<T extends (...args: any[]) => any> implements Proceed
   }
 
   public proceed(): ReturnType<T> {
-    return this._aspects.length === 0 ? this._target(this._args)
+    return this._aspects.length === 0 ? this._target.call(this, this._args)
       : this._aspects[0].aspect(new ProceedingTargetImpl(this._aspectName, this._args, this._target, this._aspects.slice(1)));
   }
 }
@@ -74,6 +78,13 @@ const doBefore = <T extends any[]>(aspectName: string, args: T): T => {
   }, args);
 };
 
+/**
+ * 执行Around切面处理函数
+ *
+ * @param aspectName 切点名称
+ * @param target 目标函数
+ * @param args 目标函数入参
+ */
 const doAround = <T extends (...args: any[]) => any>(aspectName: string, target: T, args: Parameters<T>): ReturnType<T> => {
   return new ProceedingTargetImpl(aspectName, args, target, PLUGIN_MANAGER.getAround(aspectName)).proceed();
 };
