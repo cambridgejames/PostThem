@@ -27,6 +27,9 @@
     "composite": true,
     "baseUrl": ".",
     "paths": {
+      "@main/*": [
+        "src/main/*",
+      ],
       "@preload/*": [
         "src/preload/*",
       ],

@@ -54,7 +54,8 @@ export interface NamedAspect<T extends BaseAspectType> {
  */
 export class PluginManager {
   private static INSTANCE: PluginManager;
-  private readonly managerPluginMap: Map<string, ManagedPlugin> = new Map();
+
+  private readonly managedPluginMap: Map<string, ManagedPlugin> = new Map();
   private readonly beforeAspectMap: Map<string, Array<NamedAspect<BeforeAspect>>> = new Map();
   private readonly aroundAspectMap: Map<string, Array<NamedAspect<AroundAspect>>> = new Map();
   private readonly afterAspectMap: Map<string, Array<NamedAspect<AfterAspect>>> = new Map();
@@ -89,12 +90,12 @@ export class PluginManager {
    * @param pluginPath 插件根目录
    */
   public register(manifest: PluginManifest, pluginPath: string): void {
-    if (this.managerPluginMap.has(manifest.uniqueId)) {
+    if (this.managedPluginMap.has(manifest.uniqueId)) {
       console.warn(`Plugin '${manifest.uniqueId}' already registered and will be overwritten.`);
       this.removeAspectsByPluginId(manifest.uniqueId);
     }
     const managedPlugin: ManagedPlugin = new ManagedPlugin(manifest, pluginPath);
-    this.managerPluginMap.set(manifest.uniqueId, managedPlugin);
+    this.managedPluginMap.set(manifest.uniqueId, managedPlugin);
     managedPlugin.onMount().then(() => {});
     console.log(`Registered plugin: "${manifest.name}".`);
   }
@@ -224,7 +225,7 @@ export class PluginManager {
       if (!match || match.length <= 2 || StringUtil.isEmpty(match[2]) || !match[2].startsWith(customPluginRoot)) {
         return null; // 路径校验不成功返回null
       }
-      const possiblePlugins: ManagedPlugin[] = [...this.managerPluginMap.values()]
+      const possiblePlugins: ManagedPlugin[] = [...this.managedPluginMap.values()]
         .filter(plugin => match[2].startsWith(path.join(customPluginRoot, plugin.pluginPath)));
       return possiblePlugins.length > 0 ? possiblePlugins[0] : null;
     };

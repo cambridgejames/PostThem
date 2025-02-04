@@ -1,13 +1,17 @@
 export interface HTMLWebviewElement extends HTMLElement {
   src: string;
   nodeintegration?: boolean;
+  nodeintegrationinsubframes?: boolean;
   plugins?: boolean;
   preload?: string;
-  autoSize?: boolean;
   httprefeerrer?: string;
   useragent?: string;
   disablewebsecurity?: boolean;
   partition?: string;
+  allowpopups?: boolean;
+  webpreferences?: string;
+  enableblinkfeatures?: string;
+  disableblinkfeatures?: string;
 }
 
 /**
