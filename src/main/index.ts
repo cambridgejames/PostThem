@@ -2,6 +2,7 @@ import { app, shell, BrowserWindow, BrowserWindowConstructorOptions } from "elec
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
 import icon from "../../resources/icon.png?asset";
 import { LoggerManager } from "@main/logger/loggerManager";
+import { setupRenderLogging } from "@main/logger/loggerUtil";
 
 import * as path from "node:path";
 
@@ -24,7 +25,7 @@ const mainWindowOption: BrowserWindowConstructorOptions = {
   },
 };
 
-LOGGER.info("Application started.");
+LOGGER.info("Application main thread started.");
 
 const createWindow = (): void => {
   const mainWindow: BrowserWindow = new BrowserWindow(mainWindowOption);
@@ -43,6 +44,7 @@ const createWindow = (): void => {
 
 app.whenReady().then(() => {
   electronApp.setAppUserModelId("powerinv.postThem.client");
+  setupRenderLogging();
   app.on("browser-window-created", (_, window) => {
     optimizer.watchWindowShortcuts(window); // 设置默认快捷键
   });
