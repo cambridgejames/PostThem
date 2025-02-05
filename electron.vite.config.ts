@@ -10,7 +10,7 @@ export default defineConfig({
     resolve: {
       alias: {
         "@main": resolve(__dirname, "./src/main"),
-        "@preload": resolve(__dirname, "./src/preload"),
+        "@common": resolve(__dirname, "./src/common"),
         "@interface": resolve(__dirname, "./src/interface"),
         "@sdk": resolve(__dirname, "./resources/sdk"),
       },
@@ -24,6 +24,7 @@ export default defineConfig({
     resolve: {
       alias: {
         "@preload": resolve(__dirname, "./src/preload"),
+        "@common": resolve(__dirname, "./src/common"),
         "@interface": resolve(__dirname, "./src/interface"),
         "@sdk": resolve(__dirname, "./resources/sdk"),
       },

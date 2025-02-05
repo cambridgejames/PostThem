@@ -1,4 +1,4 @@
-import { readDir, readFile } from "@preload/util/fileUtil";
+import { readDir, readFile } from "@common/util/fileUtil";
 import { PluginManager } from "@preload/plugin/pluginManager";
 import {
   checkAndParseManifest,

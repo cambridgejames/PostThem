@@ -1,12 +1,12 @@
 import { ElectronAPI } from "@electron-toolkit/preload";
-import Util from "@preload/util/index";
+import { utils } from "@preload/util";
 import { Plugins } from "@preload/plugin";
 
 declare global {
   interface Window {
     electron: ElectronAPI;
     api: unknown;
-    util: Util;
+    util: typeof utils;
     plugins: Plugins
   }
 }

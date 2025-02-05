@@ -5,6 +5,7 @@
     "src/main/**/*",
     "src/preload/**/*",
     "src/preload/*.d.ts",
+    "src/common/**/*",
     "src/interface/**/*",
     "resources/sdk/**/*",
     "resources/sdk/*.d.ts"
@@ -32,6 +33,9 @@
       ],
       "@preload/*": [
         "src/preload/*",
+      ],
+      "@common/*": [
+        "src/common/*",
       ],
       "@interface/*": [
         "src/interface/*",

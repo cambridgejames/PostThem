@@ -1,8 +1,8 @@
 import { PluginManifest } from "@preload/plugin/interface/manifestInterface";
 import { BeforeAspect, AroundAspect, AfterAspect } from "@sdk/index";
 
-import * as FileUtil from "@preload/util/fileUtil";
-import * as StringUtil from "@preload/util/stringUtil";
+import * as FileUtil from "@common/util/fileUtil";
+import * as StringUtil from "@common/util/stringUtil";
 import * as path from "node:path";
 
 const PLUGIN_DIR_NAME: string = "plugins";
