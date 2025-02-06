@@ -8,10 +8,13 @@ import {
   RegisterBefore,
   RegisterAround,
   RegisterAfter,
-  AspectUtilsType,
+  AspectUtilsType, Logger,
 } from "@sdk/index";
+import { RenderLogger } from "@preload/util/loggerUtil";
+import { LoggerChannel } from "@common/ipc/ipcChannel";
 
 const PLUGIN_MANAGER: PluginManager = PluginManager.getInstance();
+const LOGGER: Logger = RenderLogger.getInstance(LoggerChannel.LOGGER_LOG_MESSAGE_PRELOAD);
 
 /**
  * 切面目标函数代理类
@@ -70,9 +73,9 @@ const doBefore = <T extends any[]>(aspectName: string, args: T): T => {
       if (realArgs !== undefined && realArgs !== null && typeof realArgs[Symbol.iterator] === "function") {
         return realArgs;
       }
-      console.error(`Before calling method "${aspectName}", args returned by plugin "${beforeAspect.pluginId}" is not iterable.`);
+      LOGGER.error(`Before calling method "${aspectName}", args returned by plugin "${beforeAspect.pluginId}" is not iterable.`);
     } catch (exception) {
-      console.error(`Before calling method "${aspectName}", plugin "${beforeAspect.pluginId}" caused exception.`, exception);
+      LOGGER.error(`Before calling method "${aspectName}", plugin "${beforeAspect.pluginId}" caused exception.`, exception);
     }
     return args;
   }, args);
@@ -100,7 +103,7 @@ const doAfter = <T>(aspectName: string, returnValue: T): T => {
     try {
       return afterAspect.aspect(returnValue);
     } catch (exception) {
-      console.error(`After calling method "${aspectName}", plugin "${afterAspect.pluginId}" caused exception.`, exception);
+      LOGGER.error(`After calling method "${aspectName}", plugin "${afterAspect.pluginId}" caused exception.`, exception);
       return returnValue;
     }
   }, returnValue);

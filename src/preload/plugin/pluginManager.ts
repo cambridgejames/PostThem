@@ -1,11 +1,14 @@
 import { PluginManifest } from "@preload/plugin/interface/manifestInterface";
-import { BeforeAspect, AroundAspect, AfterAspect } from "@sdk/index";
+import { AfterAspect, AroundAspect, BeforeAspect, Logger } from "@sdk/index";
 
 import * as FileUtil from "@common/util/fileUtil";
 import * as StringUtil from "@common/util/stringUtil";
 import * as path from "node:path";
+import { RenderLogger } from "@preload/util/loggerUtil";
+import { LoggerChannel } from "@common/ipc/ipcChannel";
 
 const PLUGIN_DIR_NAME: string = "plugins";
+const LOGGER: Logger = RenderLogger.getInstance(LoggerChannel.LOGGER_LOG_MESSAGE_PRELOAD);
 
 /**
  * 插件preload入口文件类型定义
@@ -91,13 +94,13 @@ export class PluginManager {
    */
   public register(manifest: PluginManifest, pluginPath: string): void {
     if (this.managedPluginMap.has(manifest.uniqueId)) {
-      console.warn(`Plugin '${manifest.uniqueId}' already registered and will be overwritten.`);
+      LOGGER.warn(`Plugin '${manifest.uniqueId}' already registered and will be overwritten.`);
       this.removeAspectsByPluginId(manifest.uniqueId);
     }
     const managedPlugin: ManagedPlugin = new ManagedPlugin(manifest, pluginPath);
     this.managedPluginMap.set(manifest.uniqueId, managedPlugin);
     managedPlugin.onMount().then(() => {});
-    console.log(`Registered plugin: "${manifest.name}".`);
+    LOGGER.info(`Registered plugin: "${manifest.name}".`);
   }
 
   /**
@@ -126,7 +129,7 @@ export class PluginManager {
   public registerBefore(aspectName: string, aspectMethod: BeforeAspect): void {
     const currentPlugin = this.findByCallStack(3);
     if (!currentPlugin?.manifest.aspect.require.includes(aspectName)) {
-      console.warn(`Plugin "${currentPlugin?.manifest.uniqueId}" has no permission to access aspect "${aspectName}".`);
+      LOGGER.warn(`Plugin "${currentPlugin?.manifest.uniqueId}" has no permission to access aspect "${aspectName}".`);
       return;
     }
     const beforeAspects: Array<NamedAspect<BeforeAspect>> = this.beforeAspectMap.get(aspectName) || [];
@@ -156,7 +159,7 @@ export class PluginManager {
   public registerAround(aspectName: string, aspectMethod: AroundAspect): void {
     const currentPlugin = this.findByCallStack(3);
     if (!currentPlugin?.manifest.aspect.require.includes(aspectName)) {
-      console.warn(`Plugin "${currentPlugin?.manifest.uniqueId}" has no permission to access aspect "${aspectName}".`);
+      LOGGER.warn(`Plugin "${currentPlugin?.manifest.uniqueId}" has no permission to access aspect "${aspectName}".`);
       return;
     }
     const aroundAspects: Array<NamedAspect<AroundAspect>> = this.aroundAspectMap.get(aspectName) || [];
@@ -186,7 +189,7 @@ export class PluginManager {
   public registerAfter(aspectName: string, aspectMethod: AfterAspect): void {
     const currentPlugin = this.findByCallStack(3);
     if (!currentPlugin?.manifest.aspect.require.includes(aspectName)) {
-      console.warn(`Plugin "${currentPlugin?.manifest.uniqueId}" has no permission to access aspect "${aspectName}".`);
+      LOGGER.warn(`Plugin "${currentPlugin?.manifest.uniqueId}" has no permission to access aspect "${aspectName}".`);
       return;
     }
     const afterAspects: Array<NamedAspect<AfterAspect>> = this.afterAspectMap.get(aspectName) || [];

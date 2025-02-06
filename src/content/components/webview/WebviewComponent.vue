@@ -27,6 +27,7 @@ const props = defineProps({
 const uuid: string = crypto.randomUUID() + `_${props.configure ? "webview_" + props.configure.name : "default"}`;
 
 onMounted(() => {
+  console.log(window.logger.info);
   console.log("WebviewComponent mounted.", uuid);
 });
 

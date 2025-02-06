@@ -28,7 +28,7 @@ const initWebview = () => {
     return;
   }
   webview.value.addEventListener("did-finish-load", () => {
-    console.log("did-finish-load", props.configure.id);
+    window.logger.info("did-finish-load", props.configure.id);
     isLoadFinish.value = true;
   });
 };

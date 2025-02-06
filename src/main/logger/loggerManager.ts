@@ -1,8 +1,11 @@
 import { is } from "@electron-toolkit/utils";
-import log4js, { Configuration, FileAppender, Logger } from "log4js";
+import log4js, { Configuration, FileAppender, Logger, LogLevelFilterAppender } from "log4js";
 
 import * as path from "node:path";
 import * as fs from "node:fs";
+import { LoggerLevel } from "@interface/common";
+
+const LOG_ENCODING: string = "utf-8";
 
 const LOG_FILE_DIR_NAME: string = "log";
 const LOG_FILE_SUB_DIR_NORMAL: string = ".";
@@ -22,15 +25,10 @@ export class LoggerManager {
   private constructor() {
     this.loggerConfigure = {
       appenders: {
-        console: {
-          type: "console",
-        },
+        console: { type: "console", level: LoggerLevel.TRACE, encoding: LOG_ENCODING },
       },
       categories: {
-        default: {
-          appenders: ["console"],
-          level: "trace",
-        },
+        default: { appenders: ["console"], level: LoggerLevel.TRACE },
       },
     };
   }
@@ -83,22 +81,32 @@ export class LoggerManager {
       return; // 已经创建配置文件的直接返回
     }
     this.createLogDir(path.join(LOG_FILE_DIR_NAME, pathToLogFile));
-    const appenders = (is.dev && process.env["ELECTRON_RENDERER_URL"]) ? [loggerName, "console"] : [loggerName];
+    const filterLoggerName: string = `Filter_${loggerName}`;
     const currentFileAppender: FileAppender = {
       type: "file",
       filename: path.join(LOG_FILE_DIR_NAME, pathToLogFile, `${loggerName}.log`),
       maxLogSize: LOG_FILE_MAX_SIZE,
       backups: LOG_FILE_BACKUP_NUM,
       compress: true,
+      encoding: LOG_ENCODING,
+    };
+    const currentFileFilterAppender: LogLevelFilterAppender = {
+      type: "logLevelFilter",
+      level: LoggerLevel.INFO, // 过滤日志等级，文件中只能写入高于INFO等级的日志
+      appender: loggerName,
     };
     this.loggerConfigure = {
       appenders: {
         ...this.loggerConfigure.appenders,
         [loggerName]: currentFileAppender,
+        [filterLoggerName]: currentFileFilterAppender,
       },
       categories: {
         ...this.loggerConfigure.categories,
-        [loggerName]: { appenders: appenders, level: "info" },
+        [loggerName]: {
+          appenders: (is.dev && process.env["ELECTRON_RENDERER_URL"]) ? [filterLoggerName, "console"] : [filterLoggerName],
+          level: LoggerLevel.TRACE,
+        },
       },
     };
     log4js.configure(this.loggerConfigure);

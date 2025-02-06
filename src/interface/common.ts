@@ -1,3 +1,15 @@
+/**
+ * Logger日志等级
+ */
+export enum LoggerLevel {
+  TRACE = "trace",
+  DEBUG = "debug",
+  INFO = "info",
+  WARN = "warn",
+  ERROR = "error",
+  FATAL = "fatal",
+}
+
 export interface HTMLWebviewElement extends HTMLElement {
   src: string;
   nodeintegration?: boolean;
