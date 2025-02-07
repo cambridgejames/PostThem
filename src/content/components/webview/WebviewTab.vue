@@ -23,11 +23,18 @@ const props = defineProps({
 const webview = ref<HTMLWebviewElement>();
 const isLoadFinish = ref<boolean>(false);
 
-onMounted(() => {
-  webview.value?.addEventListener("did-finish-load", () => {
-    console.log("did-finish-load", props.configure.id);
+const initWebview = () => {
+  if (!webview.value) {
+    return;
+  }
+  webview.value.addEventListener("did-finish-load", () => {
+    window.logger.info("did-finish-load", props.configure.id);
     isLoadFinish.value = true;
   });
+};
+
+onMounted(() => {
+  initWebview();
 });
 
 </script>

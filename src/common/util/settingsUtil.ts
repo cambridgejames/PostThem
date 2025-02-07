@@ -1,15 +1,15 @@
-import DefaultConfigure from "@preload/configure";
 import { JSONPath } from "jsonpath-plus";
-import * as path from "path";
-import { readFile } from "@preload/util/fileUtil";
-import * as StringUtil from "@preload/util/stringUtil";
 import { Configure, ConfigureType } from "@interface/common";
+import * as FileUtil from "@common/util/fileUtil";
+import * as StringUtil from "@common/util/stringUtil";
+
+import * as path from "path";
+
+import DefaultConfigure from "@preload/configure";
 
 const CONFIG_FILE_PATH: string = "configure";
 const CONFIG_FILE_NAME_SUFFIX: string = ".user.json";
 // const CONFIG_FILE_INDENTATION: number = 2;
-
-
 
 /**
  * 配置文件枚举相关信息
@@ -36,7 +36,7 @@ const ConfigureTypeMap: { [key in ConfigureType]: ConfigureTypeInfo } = {
 export const readConfigureFile = async <T> (configureType: ConfigureType): Promise<Configure<T>> => {
   try {
     const pathToFile = path.join(CONFIG_FILE_PATH, ConfigureTypeMap[configureType]?.name + CONFIG_FILE_NAME_SUFFIX);
-    const userConfigure = await readFile(pathToFile);
+    const userConfigure = await FileUtil.readFile(pathToFile);
     return StringUtil.isEmpty(userConfigure) ? DefaultConfigure[configureType] : JSON.parse(userConfigure);
   } catch (error) {
     return DefaultConfigure[configureType];

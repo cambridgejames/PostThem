@@ -1,5 +1,5 @@
-import * as StringUtil from "@preload/util/stringUtil";
-import * as FileUtil from "@preload/util/fileUtil";
+import * as StringUtil from "@common/util/stringUtil";
+import * as FileUtil from "@common/util/fileUtil";
 import * as path from "node:path";
 
 /**
