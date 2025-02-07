@@ -7,6 +7,14 @@ export default defineConfig({
     plugins: [
       externalizeDepsPlugin(),
     ],
+    resolve: {
+      alias: {
+        "@main": resolve(__dirname, "./src/main"),
+        "@common": resolve(__dirname, "./src/common"),
+        "@interface": resolve(__dirname, "./src/interface"),
+        "@sdk": resolve(__dirname, "./resources/sdk"),
+      },
+    },
   },
   preload: {
     plugins: [
@@ -16,6 +24,7 @@ export default defineConfig({
     resolve: {
       alias: {
         "@preload": resolve(__dirname, "./src/preload"),
+        "@common": resolve(__dirname, "./src/common"),
         "@interface": resolve(__dirname, "./src/interface"),
         "@sdk": resolve(__dirname, "./resources/sdk"),
       },

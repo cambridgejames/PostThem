@@ -1,11 +1,14 @@
 import { PluginManifest } from "@preload/plugin/interface/manifestInterface";
-import { BeforeAspect, AfterAspect } from "@sdk/index";
+import { AfterAspect, AroundAspect, BeforeAspect, Logger } from "@sdk/index";
 
-import * as FileUtil from "@preload/util/fileUtil";
-import * as StringUtil from "@preload/util/stringUtil";
+import * as FileUtil from "@common/util/fileUtil";
+import * as StringUtil from "@common/util/stringUtil";
 import * as path from "node:path";
+import { RenderLogger } from "@preload/util/loggerUtil";
+import { LoggerChannel } from "@common/ipc/ipcChannel";
 
 const PLUGIN_DIR_NAME: string = "plugins";
+const LOGGER: Logger = RenderLogger.getInstance(LoggerChannel.LOGGER_LOG_MESSAGE_PRELOAD);
 
 /**
  * 插件preload入口文件类型定义
@@ -43,7 +46,8 @@ class ManagedPlugin implements PluginPreloadEntry {
   }
 }
 
-export interface NamedAspect<T extends BeforeAspect | AfterAspect> {
+type BaseAspectType = BeforeAspect | AroundAspect | AfterAspect;
+export interface NamedAspect<T extends BaseAspectType> {
   pluginId: string;
   aspect: T;
 }
@@ -53,9 +57,13 @@ export interface NamedAspect<T extends BeforeAspect | AfterAspect> {
  */
 export class PluginManager {
   private static INSTANCE: PluginManager;
-  private readonly managerPluginMap: Map<string, ManagedPlugin> = new Map();
+
+  private readonly managedPluginMap: Map<string, ManagedPlugin> = new Map();
   private readonly beforeAspectMap: Map<string, Array<NamedAspect<BeforeAspect>>> = new Map();
+  private readonly aroundAspectMap: Map<string, Array<NamedAspect<AroundAspect>>> = new Map();
   private readonly afterAspectMap: Map<string, Array<NamedAspect<AfterAspect>>> = new Map();
+
+  private constructor() {}
 
   /**
    * 获取插件管理器实例
@@ -85,13 +93,31 @@ export class PluginManager {
    * @param pluginPath 插件根目录
    */
   public register(manifest: PluginManifest, pluginPath: string): void {
-    if (this.managerPluginMap.has(manifest.uniqueId)) {
-      console.warn(`Plugin '${manifest.uniqueId}' already registered and will be overwritten.`);
+    if (this.managedPluginMap.has(manifest.uniqueId)) {
+      LOGGER.warn(`Plugin '${manifest.uniqueId}' already registered and will be overwritten.`);
+      this.removeAspectsByPluginId(manifest.uniqueId);
     }
     const managedPlugin: ManagedPlugin = new ManagedPlugin(manifest, pluginPath);
-    this.managerPluginMap.set(manifest.uniqueId, managedPlugin);
+    this.managedPluginMap.set(manifest.uniqueId, managedPlugin);
     managedPlugin.onMount().then(() => {});
-    console.log(`Registered plugin: "${manifest.name}".`);
+    LOGGER.info(`Registered plugin: "${manifest.name}".`);
+  }
+
+  /**
+   * 删除指定插件注册过的所有切面
+   *
+   * @param pluginId 插件Id
+   * @private
+   */
+  private removeAspectsByPluginId(pluginId: string): void {
+    const removeAspects = <T extends BaseAspectType>(aspectMap: Map<string, Array<NamedAspect<T>>>, pluginId: string): void => {
+      aspectMap.forEach((namedAspects, aspectName) => {
+        aspectMap.set(aspectName, namedAspects.filter(namedAspect => namedAspect.pluginId === pluginId));
+      });
+    };
+    removeAspects(this.beforeAspectMap, pluginId);
+    removeAspects(this.aroundAspectMap, pluginId);
+    removeAspects(this.afterAspectMap, pluginId);
   }
 
   /**
@@ -103,7 +129,7 @@ export class PluginManager {
   public registerBefore(aspectName: string, aspectMethod: BeforeAspect): void {
     const currentPlugin = this.findByCallStack(3);
     if (!currentPlugin?.manifest.aspect.require.includes(aspectName)) {
-      console.warn(`Plugin "${currentPlugin?.manifest.uniqueId}" has no permission to access aspect "${aspectName}".`);
+      LOGGER.warn(`Plugin "${currentPlugin?.manifest.uniqueId}" has no permission to access aspect "${aspectName}".`);
       return;
     }
     const beforeAspects: Array<NamedAspect<BeforeAspect>> = this.beforeAspectMap.get(aspectName) || [];
@@ -125,6 +151,36 @@ export class PluginManager {
   }
 
   /**
+   * 注册Around切面处理方法
+   *
+   * @param {string} aspectName 切点名称
+   * @param {AroundAspect} aspectMethod 切面方法
+   */
+  public registerAround(aspectName: string, aspectMethod: AroundAspect): void {
+    const currentPlugin = this.findByCallStack(3);
+    if (!currentPlugin?.manifest.aspect.require.includes(aspectName)) {
+      LOGGER.warn(`Plugin "${currentPlugin?.manifest.uniqueId}" has no permission to access aspect "${aspectName}".`);
+      return;
+    }
+    const aroundAspects: Array<NamedAspect<AroundAspect>> = this.aroundAspectMap.get(aspectName) || [];
+    aroundAspects.push({
+      pluginId: currentPlugin.manifest.uniqueId,
+      aspect: aspectMethod,
+    });
+    this.aroundAspectMap.set(aspectName, aroundAspects);
+  }
+
+  /**
+   * 获取Around切面处理方法
+   *
+   * @param {string} aspectName 切点名称
+   * @return {Array<NamedAspect<AroundAspect>>} Around切面处理方法
+   */
+  public getAround(aspectName: string): Array<NamedAspect<AroundAspect>> {
+    return this.aroundAspectMap.get(aspectName) || [];
+  }
+
+  /**
    * 注册After切面处理方法
    *
    * @param {string} aspectName 切点名称
@@ -133,7 +189,7 @@ export class PluginManager {
   public registerAfter(aspectName: string, aspectMethod: AfterAspect): void {
     const currentPlugin = this.findByCallStack(3);
     if (!currentPlugin?.manifest.aspect.require.includes(aspectName)) {
-      console.warn(`Plugin "${currentPlugin?.manifest.uniqueId}" has no permission to access aspect "${aspectName}".`);
+      LOGGER.warn(`Plugin "${currentPlugin?.manifest.uniqueId}" has no permission to access aspect "${aspectName}".`);
       return;
     }
     const afterAspects: Array<NamedAspect<AfterAspect>> = this.afterAspectMap.get(aspectName) || [];
@@ -159,6 +215,7 @@ export class PluginManager {
    *
    * @param startIndex 调用栈起始查找深度
    * @return {ManagedPlugin | null} 插件
+   * @private
    */
   private findByCallStack(startIndex: number = 2): ManagedPlugin | null {
     const stack: string[] | undefined = new Error().stack?.split("\n").slice(1);
@@ -171,7 +228,7 @@ export class PluginManager {
       if (!match || match.length <= 2 || StringUtil.isEmpty(match[2]) || !match[2].startsWith(customPluginRoot)) {
         return null; // 路径校验不成功返回null
       }
-      const possiblePlugins: ManagedPlugin[] = [...this.managerPluginMap.values()]
+      const possiblePlugins: ManagedPlugin[] = [...this.managedPluginMap.values()]
         .filter(plugin => match[2].startsWith(path.join(customPluginRoot, plugin.pluginPath)));
       return possiblePlugins.length > 0 ? possiblePlugins[0] : null;
     };

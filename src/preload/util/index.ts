@@ -1,6 +1,6 @@
-import * as FileUtils from "@preload/util/fileUtil";
-import * as SettingsUtils from "@preload/util/settingsUtil";
-import * as StringUtils from "@preload/util/stringUtil";
+import * as FileUtils from "@common/util/fileUtil";
+import * as SettingsUtils from "@common/util/settingsUtil";
+import * as StringUtils from "@common/util/stringUtil";
 
 export const utils = {
   FileUtils,
