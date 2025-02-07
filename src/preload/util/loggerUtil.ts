@@ -18,10 +18,10 @@ export class RenderLogger implements Logger {
   /**
    * 获取渲染进程Logger实例
    *
-   * @param {LoggerChannel} channel
-   * @return {RenderLogger} 渲染进程Logger实例
+   * @param {LoggerChannel} channel 日志通道
+   * @return {Logger} 渲染进程Logger实例
    */
-  public static getInstance(channel: LoggerChannel): RenderLogger {
+  public static getInstance(channel: LoggerChannel): Logger {
     if (!this.INSTANCE_MAP.has(channel)) {
       this.INSTANCE_MAP.set(channel, new RenderLogger(channel));
     }
@@ -64,3 +64,21 @@ export class RenderLogger implements Logger {
     ipcRenderer.send(this._ipcChannel, level, message, ...args);
   }
 }
+
+/**
+ * 获取日志记录器
+ *
+ * @param {LoggerChannel} loggerChannel 日志通道
+ * @returns {Logger} 日志记录器
+ */
+export const getLogger = (loggerChannel: LoggerChannel): Logger => {
+  const instance: Logger = RenderLogger.getInstance(loggerChannel);
+  return {
+    trace: (message: any, ...args: any[]) => instance.trace(message, ...args),
+    debug: (message: any, ...args: any[]) => instance.debug(message, ...args),
+    info: (message: any, ...args: any[]) => instance.info(message, ...args),
+    warn: (message: any, ...args: any[]) => instance.warn(message, ...args),
+    error: (message: any, ...args: any[]) => instance.error(message, ...args),
+    fatal: (message: any, ...args: any[]) => instance.fatal(message, ...args),
+  };
+};
