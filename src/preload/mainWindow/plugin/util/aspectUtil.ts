@@ -1,4 +1,4 @@
-import { NamedAspect, PluginManager } from "@preload/plugin/pluginManager";
+import { NamedAspect, PluginManager } from "@preload/mainWindow/plugin/pluginManager";
 import {
   ProceedingTarget,
   BeforeAspect,
@@ -10,7 +10,7 @@ import {
   RegisterAfter,
   AspectUtilsType, Logger,
 } from "@sdk/index";
-import { RenderLogger } from "@preload/util/loggerUtil";
+import { RenderLogger } from "@preload/mainWindow/util/loggerUtil";
 import { LoggerChannel } from "@common/ipc/ipcChannel";
 
 const PLUGIN_MANAGER: PluginManager = PluginManager.getInstance();

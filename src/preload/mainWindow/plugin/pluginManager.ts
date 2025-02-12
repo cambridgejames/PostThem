@@ -1,10 +1,10 @@
-import { PluginManifest } from "@preload/plugin/interface/manifestInterface";
+import { PluginManifest } from "@preload/mainWindow/plugin/interface/manifestInterface";
 import { AfterAspect, AroundAspect, BeforeAspect, Logger } from "@sdk/index";
 
 import * as FileUtil from "@common/util/fileUtil";
 import * as StringUtil from "@common/util/stringUtil";
 import * as path from "node:path";
-import { RenderLogger } from "@preload/util/loggerUtil";
+import { RenderLogger } from "@preload/mainWindow/util/loggerUtil";
 import { LoggerChannel } from "@common/ipc/ipcChannel";
 
 const PLUGIN_DIR_NAME: string = "plugins";

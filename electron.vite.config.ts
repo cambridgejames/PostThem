@@ -21,6 +21,14 @@ export default defineConfig({
       externalizeDepsPlugin(),
       bytecodePlugin(),
     ],
+    build: {
+      rollupOptions: {
+        input: {
+          mainWindow: resolve(__dirname, "./src/preload/mainWindow"),
+          pluginWindow: resolve(__dirname, "./src/preload/pluginWindow"),
+        },
+      },
+    },
     resolve: {
       alias: {
         "@preload": resolve(__dirname, "./src/preload"),

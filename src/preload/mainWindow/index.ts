@@ -1,8 +1,12 @@
-import * as ApiExposeUtil from "@preload/api/apiExposeUtil";
-import { utils } from "@preload/util";
-import { plugins } from "@preload/plugin";
-import { getLogger } from "@preload/util/loggerUtil";
+import * as ApiExposeUtil from "@preload/mainWindow/api/apiExposeUtil";
+import { utils } from "@preload/mainWindow/util";
+import { plugins } from "@preload/mainWindow/plugin";
+import { getLogger } from "@preload/mainWindow/util/loggerUtil";
 import { LoggerChannel } from "@common/ipc/ipcChannel";
+
+import { ipcRenderer } from "electron/renderer";
+console.log(ipcRenderer.sendSync("TestPluginRender", "plugin", 5, 6, 7, 8));
+
 
 // 向全部Web页面暴露Api
 ApiExposeUtil.exposeApiForRender("util", utils);

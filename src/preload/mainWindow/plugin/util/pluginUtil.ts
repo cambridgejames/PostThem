@@ -1,14 +1,14 @@
 import { readDir, readFile } from "@common/util/fileUtil";
-import { PluginManager } from "@preload/plugin/pluginManager";
+import { PluginManager } from "@preload/mainWindow/plugin/pluginManager";
 import {
   checkAndParseManifest,
   ManifestCheckResult,
   PluginManifest,
-} from "@preload/plugin/interface/manifestInterface";
+} from "@preload/mainWindow/plugin/interface/manifestInterface";
 
 import * as path from "node:path";
 import { Logger } from "@sdk/index";
-import { RenderLogger } from "@preload/util/loggerUtil";
+import { RenderLogger } from "@preload/mainWindow/util/loggerUtil";
 import { LoggerChannel } from "@common/ipc/ipcChannel";
 
 const PLUGIN_MANIFEST_FILE_NAME: string = "manifest.json";

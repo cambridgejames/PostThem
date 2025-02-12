@@ -1,6 +1,6 @@
-import { AspectUtil } from "@preload/plugin/util/aspectUtil";
+import { AspectUtil } from "@preload/mainWindow/plugin/util/aspectUtil";
 import { AspectUtilsType } from "@sdk/index";
-import { PluginUtil, PluginUtilType } from "@preload/plugin/util/pluginUtil";
+import { PluginUtil, PluginUtilType } from "@preload/mainWindow/plugin/util/pluginUtil";
 
 export interface Plugins {
   AspectUtil: AspectUtilsType;

@@ -5,7 +5,7 @@
     "src/content/**/*",
     "src/content/**/*.ts",
     "src/content/**/*.vue",
-    "src/preload/*.d.ts",
+    "src/preload/**/*.d.ts",
     "src/interface/**/*"
   ],
   "compilerOptions": {
