@@ -1,11 +1,12 @@
+import { RenderName } from "@common/util/ipcUtil";
+import { LoggerManager } from "@main/logger/loggerManager";
+import { setupRender2RenderIpc } from "@main/ipc/ipcRenderUtil";
+import { setupRenderLogging } from "@main/logger/loggerUtil";
+import icon from "../../resources/icon.png?asset";
+
 import { app, shell, BrowserWindow, BrowserWindowConstructorOptions } from "electron";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
-import icon from "../../resources/icon.png?asset";
-import { LoggerManager } from "@main/logger/loggerManager";
-import { setupRenderLogging } from "@main/logger/loggerUtil";
-
 import * as path from "node:path";
-import { ipcMain } from "electron/main";
 
 const LOGGER = LoggerManager.getInstance().getNormalLogger("root");
 const HIDDEN_WINDOWS: Map<string, BrowserWindow> = new Map();
@@ -15,7 +16,7 @@ const mainWindowOption: BrowserWindowConstructorOptions = {
   height: 900,
   show: false,
   autoHideMenuBar: true,
-  title: "PostThem",
+  title: RenderName.MAIN,
   titleBarStyle: "hidden",
   titleBarOverlay: {
     height: 40,
@@ -28,7 +29,7 @@ const mainWindowOption: BrowserWindowConstructorOptions = {
   },
 };
 const pluginWindowOption: BrowserWindowConstructorOptions = {
-  title: "plugin",
+  title: RenderName.PLUGIN,
   show: false,
   webPreferences: {
     sandbox: false,
@@ -41,7 +42,18 @@ LOGGER.info("Application main thread started.");
 const createHiddenWindow = (hiddenWindowOption: BrowserWindowConstructorOptions): void => {
   const hiddenWindow: BrowserWindow = new BrowserWindow(hiddenWindowOption);
   HIDDEN_WINDOWS.set(hiddenWindowOption.title!, hiddenWindow);
-  hiddenWindow.loadURL("data:text/html,<body></body>").then(() => {});
+  hiddenWindow.loadURL(`data:text/html,
+  <html lang="zh-CN">
+    <head>
+      <meta charset="UTF-8" />
+      <title>${hiddenWindowOption.title}</title>
+      <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+      <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:"
+      />
+    </head>
+    <body/>
+  </html>`).then(() => {});
   if (is.dev && process.env["ELECTRON_RENDERER_URL"]) {
     hiddenWindow.webContents.openDevTools();
   }
@@ -63,19 +75,10 @@ const createWindow = (): void => {
   }
 };
 
-ipcMain.on("TestPluginRender", (event, pluginTitle, ...args) => {
-  const currentWindow: BrowserWindow | undefined = HIDDEN_WINDOWS.get(pluginTitle);
-  if (!currentWindow) {
-    event.returnValue = null;
-    return;
-  }
-  currentWindow.webContents.send("TestPluginRender", ...args);
-  ipcMain.once("TestPluginRender_return", (_, response) => event.returnValue = response);
-});
-
 app.whenReady().then(() => {
   electronApp.setAppUserModelId("powerinv.postThem.client");
   setupRenderLogging();
+  setupRender2RenderIpc();
   app.on("browser-window-created", (_, window) => {
     optimizer.watchWindowShortcuts(window); // 设置默认快捷键
   });

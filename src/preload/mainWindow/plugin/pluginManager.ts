@@ -5,7 +5,7 @@ import * as FileUtil from "@common/util/fileUtil";
 import * as StringUtil from "@common/util/stringUtil";
 import * as path from "node:path";
 import { RenderLogger } from "@preload/mainWindow/util/loggerUtil";
-import { LoggerChannel } from "@common/ipc/ipcChannel";
+import { LoggerChannel } from "@common/util/ipcUtil";
 
 const PLUGIN_DIR_NAME: string = "plugins";
 const LOGGER: Logger = RenderLogger.getInstance(LoggerChannel.LOGGER_LOG_MESSAGE_PRELOAD);

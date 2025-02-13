@@ -1,7 +1,7 @@
 import { contextBridge } from "electron";
 import { Logger } from "@sdk/index";
 import { RenderLogger } from "@preload/mainWindow/util/loggerUtil";
-import { LoggerChannel } from "@common/ipc/ipcChannel";
+import { LoggerChannel } from "@common/util/ipcUtil";
 
 const LOGGER: Logger = RenderLogger.getInstance(LoggerChannel.LOGGER_LOG_MESSAGE_PRELOAD);
 

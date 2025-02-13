@@ -9,7 +9,7 @@ import {
 import * as path from "node:path";
 import { Logger } from "@sdk/index";
 import { RenderLogger } from "@preload/mainWindow/util/loggerUtil";
-import { LoggerChannel } from "@common/ipc/ipcChannel";
+import { LoggerChannel } from "@common/util/ipcUtil";
 
 const PLUGIN_MANIFEST_FILE_NAME: string = "manifest.json";
 const PLUGIN_REQUIRED_FILES: string[] = [

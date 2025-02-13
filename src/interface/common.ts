@@ -47,3 +47,27 @@ export interface WebviewConfigureItem {
 
 export interface WebviewConfigure extends Configure<Array<WebviewConfigureItem>> {
 }
+
+/**
+ * Ipc通信通用返回消息体
+ */
+export interface IpcReturnMessage<T> {
+  status: boolean;
+  message: string;
+  data?: T | IpcError;
+}
+
+/**
+ * Ipc通信通用异常返回体
+ */
+export class IpcError {
+  public readonly name: string;
+  public readonly message: string;
+  public readonly stack: Array<string>;
+
+  public constructor(exception: Error) {
+    this.name = exception.name;
+    this.message = exception.message;
+    this.stack = exception.stack?.split("\n").slice(1).map(item => item.trim()) || [];
+  }
+}

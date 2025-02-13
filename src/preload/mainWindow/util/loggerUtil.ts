@@ -1,6 +1,6 @@
 import { ipcRenderer } from "electron/renderer";
 import { LoggerLevel } from "@interface/common";
-import { LoggerChannel } from "@common/ipc/ipcChannel";
+import { LoggerChannel } from "@common/util/ipcUtil";
 import { Logger } from "@sdk/index";
 
 /**

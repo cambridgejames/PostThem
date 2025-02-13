@@ -2,10 +2,11 @@ import * as ApiExposeUtil from "@preload/mainWindow/api/apiExposeUtil";
 import { utils } from "@preload/mainWindow/util";
 import { plugins } from "@preload/mainWindow/plugin";
 import { getLogger } from "@preload/mainWindow/util/loggerUtil";
-import { LoggerChannel } from "@common/ipc/ipcChannel";
+import { callRender, LoggerChannel, RenderName } from "@common/util/ipcUtil";
+import { IpcReturnMessage } from "@interface/common";
 
-import { ipcRenderer } from "electron/renderer";
-console.log(ipcRenderer.sendSync("TestPluginRender", "plugin", 5, 6, 7, 8));
+const data: IpcReturnMessage<string> = callRender(RenderName.PLUGIN, "pluginWindow.testFunction.join", 5, 6, 7, 8);
+console.log(data.data);
 
 
 // 向全部Web页面暴露Api

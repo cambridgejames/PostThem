@@ -1,5 +1,5 @@
-import { ipcRenderer } from "electron/renderer";
+import { registerOnRender } from "@common/util/ipcUtil";
 
-ipcRenderer.on("TestPluginRender", (_, ...args) => {
-  ipcRenderer.send("TestPluginRender_return", args.join(", "));
+registerOnRender("pluginWindow.testFunction.join", (...args: string[]) => {
+  return args.join(", ");
 });
