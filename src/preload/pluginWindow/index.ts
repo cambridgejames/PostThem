@@ -1,4 +1,4 @@
-import { registerOnRender } from "@common/util/ipcUtil";
+import { registerOnRender } from "@preload/common/util/ipcRenderUtil";
 
 registerOnRender("pluginWindow.testFunction.join", (...args: string[]) => {
   return args.join(", ");

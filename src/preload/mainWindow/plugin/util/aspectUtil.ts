@@ -10,8 +10,8 @@ import {
   RegisterAfter,
   AspectUtilsType, Logger,
 } from "@sdk/index";
-import { RenderLogger } from "@preload/mainWindow/util/loggerUtil";
-import { LoggerChannel } from "@common/util/ipcUtil";
+import { RenderLogger } from "@preload/common/util/loggerUtil";
+import { LoggerChannel } from "@common/model/ipcChannelModels";
 
 const PLUGIN_MANAGER: PluginManager = PluginManager.getInstance();
 const LOGGER: Logger = RenderLogger.getInstance(LoggerChannel.LOGGER_LOG_MESSAGE_PRELOAD);

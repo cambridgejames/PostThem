@@ -1,13 +1,13 @@
-import { CommonChannel, IpcReturnMessageCode, RenderName } from "@common/util/ipcUtil";
+import { IpcForwardChannel, IpcReturnMessageCode, RenderName } from "@common/model/ipcChannelModels";
 import { IpcReturnMessage } from "@interface/common";
-import { IpcRenderManager } from "@main/ipc/ipcRenderManager";
+import { IpcForwardManager } from "@main/ipc/ipcForwardManager";
 import { LoggerManager } from "@main/logger/loggerManager";
 import { BrowserWindow, IpcMainEvent, WebContents } from "electron";
 import { ipcMain } from "electron/main";
 
 const LOGGER = LoggerManager.getInstance().getNormalLogger("root");
 
-const IPC_RENDER_MANAGER: IpcRenderManager = IpcRenderManager.getInstance();
+const IPC_RENDER_MANAGER: IpcForwardManager = IpcForwardManager.getInstance();
 const RENDER_WEB_CONTENTS_CACHE: Map<RenderName, WebContents> = new Map();
 
 /**
@@ -62,11 +62,11 @@ const callRenderFunctionSync = (event: IpcMainEvent, renderName: RenderName, fun
     } as IpcReturnMessage<boolean>;
     return;
   }
-  ipcMain.once(`${CommonChannel.RENDER_TO_RENDER_RETURN_CHANNEL}_${functionName}`, (_, returnValue) => {
+  ipcMain.once(`${IpcForwardChannel.RENDER_TO_RENDER_RETURN_CHANNEL}_${functionName}`, (_, returnValue) => {
     LOGGER.trace(`Call function "${functionName}" in "${renderName}" succeeded: received return value from target window.`);
     event.returnValue = returnValue;
   });
-  targetWebContents.send(`${CommonChannel.RENDER_TO_RENDER_CHANNEL}_${functionName}`, ...args);
+  targetWebContents.send(`${IpcForwardChannel.RENDER_TO_RENDER_CHANNEL}_${functionName}`, ...args);
   LOGGER.trace(`Call function "${functionName}" in "${renderName}" succeeded: send message to target window.`);
 };
 
@@ -74,8 +74,8 @@ const callRenderFunctionSync = (event: IpcMainEvent, renderName: RenderName, fun
  * 初始化主进程转发跨渲染进程Api调用消息监听方法
  */
 export const setupRender2RenderIpc = (): void => {
-  ipcMain.removeListener(CommonChannel.RENDER_TO_RENDER_REGISTER_CHANNEL, registerRenderFunctionSync);
-  ipcMain.on(CommonChannel.RENDER_TO_RENDER_REGISTER_CHANNEL, registerRenderFunctionSync);
-  ipcMain.removeListener(CommonChannel.RENDER_TO_RENDER_CHANNEL, callRenderFunctionSync);
-  ipcMain.on(CommonChannel.RENDER_TO_RENDER_CHANNEL, callRenderFunctionSync);
+  ipcMain.removeListener(IpcForwardChannel.RENDER_TO_RENDER_REGISTER_CHANNEL, registerRenderFunctionSync);
+  ipcMain.on(IpcForwardChannel.RENDER_TO_RENDER_REGISTER_CHANNEL, registerRenderFunctionSync);
+  ipcMain.removeListener(IpcForwardChannel.RENDER_TO_RENDER_CHANNEL, callRenderFunctionSync);
+  ipcMain.on(IpcForwardChannel.RENDER_TO_RENDER_CHANNEL, callRenderFunctionSync);
 };

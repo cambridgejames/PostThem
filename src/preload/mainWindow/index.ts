@@ -1,8 +1,9 @@
-import * as ApiExposeUtil from "@preload/mainWindow/api/apiExposeUtil";
+import * as ApiExposeUtil from "@preload/common/util/apiExposeUtil";
+import { callRender } from "@preload/common/util/ipcRenderUtil";
 import { utils } from "@preload/mainWindow/util";
 import { plugins } from "@preload/mainWindow/plugin";
-import { getLogger } from "@preload/mainWindow/util/loggerUtil";
-import { callRender, LoggerChannel, RenderName } from "@common/util/ipcUtil";
+import { getLogger } from "@preload/common/util/loggerUtil";
+import { LoggerChannel, RenderName } from "@common/model/ipcChannelModels";
 import { IpcReturnMessage } from "@interface/common";
 
 const data: IpcReturnMessage<string> = callRender(RenderName.PLUGIN, "pluginWindow.testFunction.join", 5, 6, 7, 8);

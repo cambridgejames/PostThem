@@ -1,6 +1,6 @@
-import { RenderName } from "@common/util/ipcUtil";
+import { RenderName } from "@common/model/ipcChannelModels";
 import { LoggerManager } from "@main/logger/loggerManager";
-import { setupRender2RenderIpc } from "@main/ipc/ipcRenderUtil";
+import { setupRender2RenderIpc } from "@main/ipc/ipcForwardUtil";
 import { setupRenderLogging } from "@main/logger/loggerUtil";
 import icon from "../../resources/icon.png?asset";
 

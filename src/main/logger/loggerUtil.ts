@@ -1,6 +1,6 @@
 import { ipcMain } from "electron/main";
 import { Logger } from "log4js";
-import { LoggerChannel } from "@common/util/ipcUtil";
+import { LoggerChannel } from "@common/model/ipcChannelModels";
 import { LoggerLevel } from "@interface/common";
 import { LoggerManager } from "@main/logger/loggerManager";
 

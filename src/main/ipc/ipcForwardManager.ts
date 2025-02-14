@@ -1,4 +1,4 @@
-import { RenderName } from "@common/util/ipcUtil";
+import { RenderName } from "@common/model/ipcChannelModels";
 import { LoggerManager } from "@main/logger/loggerManager";
 
 const LOGGER = LoggerManager.getInstance().getNormalLogger("root");
@@ -6,8 +6,8 @@ const LOGGER = LoggerManager.getInstance().getNormalLogger("root");
 /**
  * 渲染进程间通信管理类
  */
-export class IpcRenderManager {
-  private static INSTANCE: IpcRenderManager;
+export class IpcForwardManager {
+  private static INSTANCE: IpcForwardManager;
 
   private readonly _renderApiMap: Map<RenderName, Set<string>> = new Map();
 
@@ -16,11 +16,11 @@ export class IpcRenderManager {
   /**
    * 渲染进程间通信管理器实例
    *
-   * @return {IpcRenderManager} 渲染进程间通信管理器实例
+   * @return {IpcForwardManager} 渲染进程间通信管理器实例
    */
-  public static getInstance(): IpcRenderManager {
+  public static getInstance(): IpcForwardManager {
     if (!this.INSTANCE) {
-      this.INSTANCE = new IpcRenderManager();
+      this.INSTANCE = new IpcForwardManager();
     }
     return this.INSTANCE;
   }
