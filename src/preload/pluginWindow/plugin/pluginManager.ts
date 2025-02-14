@@ -1,11 +1,11 @@
-import { PluginManifest } from "@preload/mainWindow/plugin/interface/manifestInterface";
+import { PluginManifest } from "@preload/pluginWindow/plugin/manifestChecker";
 import { AfterAspect, AroundAspect, BeforeAspect, Logger } from "@sdk/index";
+import { RenderLogger } from "@preload/common/util/loggerUtil";
+import { LoggerChannel } from "@common/model/ipcChannelModels";
 
 import * as FileUtil from "@common/util/fileUtil";
 import * as StringUtil from "@common/util/stringUtil";
 import * as path from "node:path";
-import { RenderLogger } from "@preload/common/util/loggerUtil";
-import { LoggerChannel } from "@common/model/ipcChannelModels";
 
 const PLUGIN_DIR_NAME: string = "plugins";
 const LOGGER: Logger = RenderLogger.getInstance(LoggerChannel.LOGGER_LOG_MESSAGE_PRELOAD);

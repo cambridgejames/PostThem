@@ -64,7 +64,7 @@ export class RenderLogger implements Logger {
    * @private
    */
   private sendMessage(level: LoggerLevel, message: any, ...args: any[]): void {
-    if (this._pluginId) {
+    if (this._ipcChannel === LoggerChannel.LOGGER_LOG_MESSAGE_PLUGIN && this._pluginId) {
       ipcRenderer.send(this._ipcChannel, this._pluginId, level, message, ...args);
     } else {
       ipcRenderer.send(this._ipcChannel, level, message, ...args);

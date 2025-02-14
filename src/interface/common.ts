@@ -54,7 +54,8 @@ export interface WebviewConfigure extends Configure<Array<WebviewConfigureItem>>
 export interface IpcReturnMessage<T> {
   status: boolean;
   message: string;
-  data?: T | IpcError;
+  data?: T;
+  error?: IpcError;
 }
 
 /**

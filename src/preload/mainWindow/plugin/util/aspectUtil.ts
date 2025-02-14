@@ -1,48 +1,88 @@
-import { NamedAspect, PluginManager } from "@preload/mainWindow/plugin/pluginManager";
-import {
-  ProceedingTarget,
-  BeforeAspect,
-  AroundAspect,
-  AfterAspect,
-  CreateAspectProxy,
-  RegisterBefore,
-  RegisterAround,
-  RegisterAfter,
-  AspectUtilsType, Logger,
-} from "@sdk/index";
+import { AspectUtilsType, CreateAspectProxy, Logger } from "@sdk/index";
+import { LoggerChannel, RenderName } from "@common/model/ipcChannelModels";
+import { IpcReturnMessage } from "@interface/common";
 import { RenderLogger } from "@preload/common/util/loggerUtil";
-import { LoggerChannel } from "@common/model/ipcChannelModels";
+import { callRender, registerOnRender } from "@preload/common/util/ipcRenderUtil";
+import { ForwardedRenderApi } from "@preload/common/forwardedRenderApi";
 
-const PLUGIN_MANAGER: PluginManager = PluginManager.getInstance();
+import * as StringUtil from "@common/util/stringUtil";
+
 const LOGGER: Logger = RenderLogger.getInstance(LoggerChannel.LOGGER_LOG_MESSAGE_PRELOAD);
 
 /**
- * 切面目标函数代理类
+ * 目标函数代理类
+ *
+ * @template T 目标函数类型
  */
-class ProceedingTargetImpl<T extends (...args: any[]) => any> implements ProceedingTarget<T> {
-  private readonly _aspectName: string;
-  private readonly _args: Parameters<T>;
-  private readonly _target: T;
-  private readonly _aspects: Array<NamedAspect<AroundAspect>>;
+class ProxyManager<T extends (...args: any[]) => any> {
+  private static INSTANCE: ProxyManager<any>;
 
-  public constructor(aspectName: string, args: Parameters<T>, target: T, aspects: Array<NamedAspect<AroundAspect>>) {
-    this._aspectName = aspectName;
-    this._args = args;
-    this._target = target;
-    this._aspects = aspects;
+  private readonly _proxyMap: Map<string, T> = new Map();
+
+  private constructor() {
+    registerOnRender(ForwardedRenderApi.MAIN_WINDOW_PLUGIN_PROXY_TARGET_PROCEED, (aspectName: string, ...args: any[]): any => {
+      if (!this._proxyMap.has(aspectName)) {
+        throw new Error(`Proceed target failed: aspect "${aspectName}" not found.`);
+      }
+      const target: T = this._proxyMap.get(aspectName)!;
+      return target(...args);
+    });
   }
 
-  public getAspectName(): string {
-    return this._aspectName;
+  /**
+   * 获取目标函数代理类实例
+   *
+   * @template T aaa
+   * @return {ProxyManager<T>} 目标函数代理类实例
+   */
+  public static getInstance<T extends (...args: any[]) => any>(): ProxyManager<T> {
+    if (!this.INSTANCE) {
+      this.INSTANCE = new ProxyManager<T>();
+    }
+    return this.INSTANCE;
   }
 
-  public getArgs(): Parameters<T> {
-    return this._args;
+  /**
+   * 将目标函数注册为切面函数
+   *
+   * @param {T} target 目标函数
+   * @param {string} aspectName 切面名称
+   */
+  public registerProxy(target: T, aspectName: string): T {
+    if (StringUtil.isEmpty(aspectName)) {
+      LOGGER.warn("Skip to create proxy, aspect name is empty.");
+      return target;
+    }
+    if (this._proxyMap.has(aspectName)) {
+      LOGGER.warn(`Create proxy, aspect name "${aspectName}" conflict, it will be overwrite.`);
+    }
+    this._proxyMap.set(aspectName, target);
+    return ((...args: Parameters<T>): ReturnType<T> => {
+      if (this._proxyMap.get(aspectName) !== target) {
+        return target(...args); // 如果代理被移除，就直接执行原函数
+      }
+      const result: IpcReturnMessage<ReturnType<T>> = this.callRender(aspectName, ...args);
+      if (!result.status) {
+        const throwable = new Error(result.message);
+        if (result.error) {
+          throwable.cause = result.error;
+        }
+        LOGGER.error(`Call proxy ${aspectName} failed: ${result.message}\n`, throwable);
+        return target(...args); // 发生异常后降级为执行原函数  TODO：1. 原函数有可能多次执行；2. 主窗口注册的Api名称是Electron
+      }
+      return result.data!;
+    }) as T;
   }
 
-  public proceed(): ReturnType<T> {
-    return this._aspects.length === 0 ? this._target.call(this, this._args)
-      : this._aspects[0].aspect(new ProceedingTargetImpl(this._aspectName, this._args, this._target, this._aspects.slice(1)));
+  /**
+   * 调用插件函数
+   *
+   * @param {string} aspectName 被调函数名称
+   * @param {Parameters<T>} args 参数
+   * @returns {IpcReturnMessage<T>} 返回值
+   */
+  private callRender(aspectName: string, ...args: Parameters<T>): IpcReturnMessage<ReturnType<T>> {
+    return callRender(RenderName.PLUGIN, ForwardedRenderApi.PLUGIN_WINDOW_CREATE_ASPECT_PROXY, aspectName, ...args);
   }
 }
 
@@ -52,96 +92,10 @@ class ProceedingTargetImpl<T extends (...args: any[]) => any> implements Proceed
  * @param target 目标函数
  * @param aspectName 切面名称
  */
-const createAspectProxy: CreateAspectProxy = <T extends (...args: any[]) => any>(target: T, aspectName: string): T => {
-  return ((...args: Parameters<T>): ReturnType<T> => {
-    const realArgs: Parameters<T> = doBefore(aspectName, args);
-    const result: ReturnType<T> = doAround(aspectName, target, realArgs);
-    return doAfter(aspectName, result);
-  }) as T;
-};
-
-/**
- * 执行Before切面处理函数
- *
- * @param aspectName 切点名称
- * @param args 目标函数入参
- */
-const doBefore = <T extends any[]>(aspectName: string, args: T): T => {
-  return PLUGIN_MANAGER.getBefore(aspectName).reduce<T>((args, beforeAspect): T => {
-    try {
-      const realArgs: T = beforeAspect.aspect(...args);
-      if (realArgs !== undefined && realArgs !== null && typeof realArgs[Symbol.iterator] === "function") {
-        return realArgs;
-      }
-      LOGGER.error(`Before calling method "${aspectName}", args returned by plugin "${beforeAspect.pluginId}" is not iterable.`);
-    } catch (exception) {
-      LOGGER.error(`Before calling method "${aspectName}", plugin "${beforeAspect.pluginId}" caused exception.`, exception);
-    }
-    return args;
-  }, args);
-};
-
-/**
- * 执行Around切面处理函数
- *
- * @param aspectName 切点名称
- * @param target 目标函数
- * @param args 目标函数入参
- */
-const doAround = <T extends (...args: any[]) => any>(aspectName: string, target: T, args: Parameters<T>): ReturnType<T> => {
-  return new ProceedingTargetImpl(aspectName, args, target, PLUGIN_MANAGER.getAround(aspectName)).proceed();
-};
-
-/**
- * 执行After切面处理函数
- *
- * @param aspectName 切点名称
- * @param returnValue 目标函数返回值
- */
-const doAfter = <T>(aspectName: string, returnValue: T): T => {
-  return PLUGIN_MANAGER.getAfter(aspectName).reverse().reduce<T>((returnValue, afterAspect): T => {
-    try {
-      return afterAspect.aspect(returnValue);
-    } catch (exception) {
-      LOGGER.error(`After calling method "${aspectName}", plugin "${afterAspect.pluginId}" caused exception.`, exception);
-      return returnValue;
-    }
-  }, returnValue);
-};
-
-/**
- * 注册Before切面处理函数
- *
- * @param aspectName 切点名称
- * @param aspectMethod 切面函数
- */
-const registerBefore: RegisterBefore = (aspectName: string, aspectMethod: BeforeAspect): void => {
-  PLUGIN_MANAGER.registerBefore(aspectName, aspectMethod);
-};
-
-/**
- * 注册Around切面处理函数
- *
- * @param aspectName 切点名称
- * @param aspectMethod 切面函数
- */
-const registerAround: RegisterAround = (aspectName: string, aspectMethod: AroundAspect): void => {
-  PLUGIN_MANAGER.registerAround(aspectName, aspectMethod);
-};
-
-/**
- * 注册After切面处理函数
- *
- * @param aspectName 切点名称
- * @param aspectMethod 切面函数
- */
-const registerAfter: RegisterAfter = (aspectName: string, aspectMethod: AfterAspect): void => {
-  PLUGIN_MANAGER.registerAfter(aspectName, aspectMethod);
+export const createAspectProxy: CreateAspectProxy = <T extends (...args: any[]) => any>(target: T, aspectName: string): T => {
+  return ProxyManager.getInstance<T>().registerProxy(target, aspectName);
 };
 
 export const AspectUtil: AspectUtilsType = {
   createAspectProxy,
-  registerBefore,
-  registerAround,
-  registerAfter,
-};
+} as AspectUtilsType;
