@@ -1,4 +1,3 @@
-import { RenderName } from "@common/model/ipcChannelModels";
 import { LoggerManager } from "@main/logger/loggerManager";
 import { setupRender2RenderIpc } from "@main/ipc/ipcForwardUtil";
 import { setupRenderLogging } from "@main/logger/loggerUtil";
@@ -16,7 +15,7 @@ const mainWindowOption: BrowserWindowConstructorOptions = {
   height: 900,
   show: false,
   autoHideMenuBar: true,
-  title: RenderName.MAIN,
+  title: "PostThem",
   titleBarStyle: "hidden",
   titleBarOverlay: {
     height: 40,
@@ -29,7 +28,7 @@ const mainWindowOption: BrowserWindowConstructorOptions = {
   },
 };
 const pluginWindowOption: BrowserWindowConstructorOptions = {
-  title: RenderName.PLUGIN,
+  title: "PostThem.plugin",
   show: false,
   webPreferences: {
     sandbox: false,

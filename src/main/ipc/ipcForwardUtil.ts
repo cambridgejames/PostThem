@@ -1,4 +1,4 @@
-import { IpcForwardChannel, IpcReturnMessageCode, RenderName } from "@common/model/ipcChannelModels";
+import { IpcForwardChannel, IpcReturnMessageCode } from "@common/model/ipcChannelModels";
 import { IpcReturnMessage } from "@interface/common";
 import { IpcForwardManager } from "@main/ipc/ipcForwardManager";
 import { LoggerManager } from "@main/logger/loggerManager";
@@ -8,7 +8,23 @@ import { ipcMain } from "electron/main";
 const LOGGER = LoggerManager.getInstance().getNormalLogger("root");
 
 const IPC_RENDER_MANAGER: IpcForwardManager = IpcForwardManager.getInstance();
-const RENDER_WEB_CONTENTS_CACHE: Map<RenderName, WebContents> = new Map();
+const RENDER_WEB_CONTENTS_CACHE: Map<number, WebContents> = new Map();
+
+/**
+ * 获取窗口名称并更新缓存
+ *
+ * @param {Electron.CrossProcessExports.IpcMainEvent} event Ipc通信事件
+ * @returns {number} 窗口名称
+ */
+const getRenderNameByEvent = (event: IpcMainEvent): number => {
+  const currentWindow: BrowserWindow | null = BrowserWindow.fromWebContents(event.sender);
+  if (!currentWindow) {
+    return -1;
+  }
+  const renderName: number = currentWindow.id;
+  RENDER_WEB_CONTENTS_CACHE.set(renderName, event.sender); // 更新窗口缓存
+  return renderName;
+};
 
 /**
  * 注册渲染进程的Api
@@ -17,8 +33,8 @@ const RENDER_WEB_CONTENTS_CACHE: Map<RenderName, WebContents> = new Map();
  * @param {string} functionName Api名称
  */
 const registerRenderFunctionSync = (event: IpcMainEvent, functionName: string): void => {
-  const currentWindow: BrowserWindow | null = BrowserWindow.fromWebContents(event.sender);
-  if (!currentWindow) {
+  const renderName: number = getRenderNameByEvent(event);
+  if (renderName < 0) {
     LOGGER.error(`Register function "${functionName}" failed: browser window not found.`);
     event.returnValue = {
       status: false,
@@ -26,8 +42,6 @@ const registerRenderFunctionSync = (event: IpcMainEvent, functionName: string): 
     } as IpcReturnMessage<boolean>;
     return;
   }
-  const renderName: RenderName = currentWindow.getTitle() as RenderName;
-  RENDER_WEB_CONTENTS_CACHE.set(renderName, event.sender); // 更新窗口缓存
   const registerResult: boolean = IPC_RENDER_MANAGER.registerRenderFunction(renderName, functionName);
   event.returnValue = {
     status: registerResult,
@@ -40,13 +54,13 @@ const registerRenderFunctionSync = (event: IpcMainEvent, functionName: string): 
  * 调用指定渲染进程的Api
  *
  * @param {Electron.CrossProcessExports.IpcMainEvent} event Ipc通信事件
- * @param {RenderName} renderName 渲染进程名称
  * @param {string} functionName Api名称
  * @param {any[]} args 参数
  */
-const callRenderFunctionSync = (event: IpcMainEvent, renderName: RenderName, functionName: string, ...args: any[]): void => {
-  if (!IPC_RENDER_MANAGER.checkRenderFunction(renderName, functionName)) {
-    LOGGER.error(`Call function "${functionName}" in "${renderName}" failed: target api not found.`);
+const callRenderFunctionSync = (event: IpcMainEvent, functionName: string, ...args: any[]): void => {
+  const renderName: any = IPC_RENDER_MANAGER.getRenderName(functionName);
+  if (!renderName) {
+    LOGGER.error(`Call function "${functionName}" failed: target api not found.`);
     event.returnValue = {
       status: false,
       message: IpcReturnMessageCode.API_NOT_FOUND,
@@ -74,6 +88,7 @@ const callRenderFunctionSync = (event: IpcMainEvent, renderName: RenderName, fun
  * 初始化主进程转发跨渲染进程Api调用消息监听方法
  */
 export const setupRender2RenderIpc = (): void => {
+  IPC_RENDER_MANAGER.clearRegisteredFunctions();
   ipcMain.removeListener(IpcForwardChannel.RENDER_TO_RENDER_REGISTER_CHANNEL, registerRenderFunctionSync);
   ipcMain.on(IpcForwardChannel.RENDER_TO_RENDER_REGISTER_CHANNEL, registerRenderFunctionSync);
   ipcMain.removeListener(IpcForwardChannel.RENDER_TO_RENDER_CHANNEL, callRenderFunctionSync);

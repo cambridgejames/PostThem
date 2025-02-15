@@ -1,5 +1,5 @@
-import { AspectUtilsType, CreateAspectProxy, Logger } from "@sdk/index";
-import { LoggerChannel, RenderName } from "@common/model/ipcChannelModels";
+import { CreateAspectProxy, Logger } from "@sdk/index";
+import { LoggerChannel } from "@common/model/ipcChannelModels";
 import { IpcReturnMessage } from "@interface/common";
 import { RenderLogger } from "@preload/common/util/loggerUtil";
 import { callRender, registerOnRender } from "@preload/common/util/ipcRenderUtil";
@@ -9,6 +9,11 @@ import * as StringUtil from "@common/util/stringUtil";
 
 const LOGGER: Logger = RenderLogger.getInstance(LoggerChannel.LOGGER_LOG_MESSAGE_PRELOAD);
 
+/**
+ * 只允许执行一次的目标函数
+ *
+ * @template T 目标函数类型
+ */
 class TargetProxy<T extends (...args: any[]) => any> {
   private readonly _target: T;
   public readonly traceId: string;
@@ -17,15 +22,17 @@ class TargetProxy<T extends (...args: any[]) => any> {
   private _targetResult?: ReturnType<T>;
   private _exception?: Error;
 
-  private constructor(target: T) {
+  public constructor(target: T) {
     this._target = target;
     this.traceId = crypto.randomUUID();
   }
 
-  public static of<T extends (...args: any[]) => any>(target: T): TargetProxy<T> {
-    return new TargetProxy(target);
-  }
-
+  /**
+   * 执行目标函数
+   *
+   * @param {Parameters<T>} args 入参
+   * @returns {ReturnType<T>} 返回值
+   */
   public call(...args: Parameters<T>): ReturnType<T> {
     if (this._called) {
       if (this._exception) {
@@ -84,6 +91,7 @@ class ProxyManager<T extends (...args: any[]) => any> {
    *
    * @param {T} target 目标函数
    * @param {string} aspectName 切面名称
+   * @returns {T} 目标函数的代理
    */
   public registerProxy(target: T, aspectName: string): T {
     if (StringUtil.isEmpty(aspectName)) {
@@ -100,7 +108,7 @@ class ProxyManager<T extends (...args: any[]) => any> {
         LOGGER.warn(`Skip to call proxy, target proxy of "${aspectName}" not found. The original function will be executed.`);
         return target(...args); // 如果代理被移除，就直接执行原函数
       }
-      const targetProxy: TargetProxy<T> = TargetProxy.of(target);
+      const targetProxy: TargetProxy<T> = new TargetProxy(target);
       try {
         this._proxyTraceMap.get(aspectName)!.set(targetProxy.traceId, targetProxy);
         return this.doProxy(targetProxy, aspectName, ...args);
@@ -126,7 +134,7 @@ class ProxyManager<T extends (...args: any[]) => any> {
         throwable.cause = result.error;
       }
       LOGGER.error(`Call proxy ${aspectName} failed: ${result.message}. The original function will be executed.\n`, throwable);
-      return target.call(...args); // 发生异常后降级为执行原函数  TODO：1. 主窗口注册的Api名称是Electron
+      return target.call(...args); // 发生异常后降级为执行原函数
     }
     return result.data!;
   }
@@ -140,20 +148,27 @@ class ProxyManager<T extends (...args: any[]) => any> {
    * @returns {IpcReturnMessage<T>} 返回值
    */
   private callRender(aspectName: string, traceId: string, ...args: Parameters<T>): IpcReturnMessage<ReturnType<T>> {
-    return callRender(RenderName.PLUGIN, ForwardedRenderApi.PLUGIN_WINDOW_CALL_ASPECT_PROXY, aspectName, traceId, ...args);
+    return callRender(ForwardedRenderApi.PLUGIN_WINDOW_CALL_ASPECT_PROXY, aspectName, traceId, ...args);
   }
 }
 
 /**
  * 将函数注册为切面函数
  *
- * @param target 目标函数
- * @param aspectName 切面名称
+ * @template T 目标函数类型
+ * @param {T} target 目标函数
+ * @param {string} aspectName 切面名称
+ * @returns {T} 目标函数的代理
  */
 export const createAspectProxy: CreateAspectProxy = <T extends (...args: any[]) => any>(target: T, aspectName: string): T => {
   return ProxyManager.getInstance<T>().registerProxy(target, aspectName);
 };
 
-export const AspectUtil: AspectUtilsType = {
-  createAspectProxy,
-} as AspectUtilsType;
+/**
+ * 扫描并加载插件
+ */
+export const loadPlugins = async (): Promise<void> => {
+  LOGGER.info("Start load plugins.");
+  callRender(ForwardedRenderApi.PLUGIN_WINDOW_LOAD_ALL_PLUGINS);
+  LOGGER.info("Plugins loading completed.");
+};

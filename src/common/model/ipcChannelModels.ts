@@ -17,14 +17,6 @@ export enum IpcForwardChannel {
 }
 
 /**
- * 渲染进程的名称
- */
-export enum RenderName {
-  MAIN = "main",
-  PLUGIN = "plugin",
-}
-
-/**
  * 跨渲染进程调用结果返回码
  */
 export enum IpcReturnMessageCode {

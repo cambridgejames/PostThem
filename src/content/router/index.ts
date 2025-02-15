@@ -8,7 +8,7 @@ import { topBtnList, bottomBtnList } from "@content/router/NavigateConfigure";
  * @returns webview路径下的子router配置
  */
 const buildWebviewPageRouter = async (): Promise<Array<RouteRecordRaw>> => {
-  const webviewConfigureItems: Array<WebviewConfigureItem> = await window.util.SettingsUtils
+  const webviewConfigureItems: Array<WebviewConfigureItem> = await window.utils.SettingsUtil
     .getConfigure("$.data", ConfigureType.WEBVIEW);
   const solution: Array<RouteRecordRaw> = [{
     path: "",

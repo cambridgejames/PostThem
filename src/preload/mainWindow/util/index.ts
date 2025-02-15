@@ -1,9 +1,13 @@
-import * as FileUtils from "@common/util/fileUtil";
-import * as SettingsUtils from "@common/util/settingsUtil";
-import * as StringUtils from "@common/util/stringUtil";
+import * as FileUtil from "@common/util/fileUtil";
+import * as SettingsUtil from "@common/util/settingsUtil";
+import * as StringUtil from "@common/util/stringUtil";
+
+import * as PluginUtil from "@preload/mainWindow/util/pluginUtil";
 
 export const utils = {
-  FileUtils,
-  SettingsUtils,
-  StringUtils,
+  FileUtil,
+  PluginUtil,
+  SettingsUtil,
+  StringUtil,
 };
+export type Utils = typeof utils;

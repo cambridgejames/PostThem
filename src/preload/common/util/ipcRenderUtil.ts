@@ -1,6 +1,6 @@
 import { ipcRenderer } from "electron/renderer";
 import { IpcError, IpcReturnMessage } from "@interface/common";
-import { IpcForwardChannel, IpcReturnMessageCode, LoggerChannel, RenderName } from "@common/model/ipcChannelModels";
+import { IpcForwardChannel, IpcReturnMessageCode, LoggerChannel } from "@common/model/ipcChannelModels";
 import { Logger } from "@sdk/index";
 import { getLogger } from "@preload/common/util/loggerUtil";
 import { ForwardedRenderApi } from "@preload/common/forwardedRenderApi";
@@ -11,13 +11,12 @@ const LOGGER: Logger = getLogger(LoggerChannel.LOGGER_LOG_MESSAGE_PRELOAD);
  * 调用其他渲染进程中的函数
  *
  * @template T 返回值数据类型
- * @param {RenderName} renderName 渲染进程的名称
  * @param {ForwardedRenderApi} functionName 被调函数名称
  * @param {any[]} args 参数
  * @returns {IpcReturnMessage<T>} 返回值
  */
-export const callRender = <T>(renderName: RenderName, functionName: ForwardedRenderApi, ...args: any[]): IpcReturnMessage<T> => {
-  return ipcRenderer.sendSync(IpcForwardChannel.RENDER_TO_RENDER_CHANNEL, renderName, functionName, ...args);
+export const callRender = <T>(functionName: ForwardedRenderApi, ...args: any[]): IpcReturnMessage<T> => {
+  return ipcRenderer.sendSync(IpcForwardChannel.RENDER_TO_RENDER_CHANNEL, functionName, ...args);
 };
 
 /**
