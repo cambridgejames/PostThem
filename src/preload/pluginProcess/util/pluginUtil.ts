@@ -1,15 +1,19 @@
+import { Logger } from "@sdk/index";
+import { IpcReturnMessage } from "@interface/common";
+import { LoggerChannel } from "@common/model/ipcChannelModels";
 import { readDir, readFile } from "@common/util/fileUtil";
-import { PluginManager } from "@preload/pluginWindow/plugin/pluginManager";
+import { ForwardedRenderApi } from "@preload/common/forwardedRenderApi";
+import { RenderLogger } from "@preload/common/util/loggerUtil";
+import { callRender } from "@preload/common/util/ipcRenderUtil";
 import {
   checkAndParseManifest,
   ManifestCheckResult,
   PluginManifest,
-} from "@preload/pluginWindow/plugin/manifestChecker";
+} from "@preload/pluginProcess/plugin/manifestChecker";
+import { PluginManager } from "@preload/pluginProcess/plugin/pluginManager";
+import { createAspectProxy } from "@preload/pluginProcess/util/aspectUtil";
 
 import * as path from "node:path";
-import { Logger } from "@sdk/index";
-import { RenderLogger } from "@preload/common/util/loggerUtil";
-import { LoggerChannel } from "@common/model/ipcChannelModels";
 
 const PLUGIN_MANIFEST_FILE_NAME: string = "manifest.json";
 const PLUGIN_REQUIRED_FILES: string[] = [
@@ -18,12 +22,10 @@ const PLUGIN_REQUIRED_FILES: string[] = [
 const PLUGIN_MANAGER: PluginManager = PluginManager.getInstance();
 const LOGGER: Logger = RenderLogger.getInstance(LoggerChannel.LOGGER_LOG_MESSAGE_PRELOAD);
 
-type LoadPlugins = () => Promise<void>;
-
 /**
  * 扫描并加载插件
  */
-export const loadPlugins: LoadPlugins = async (): Promise<void> => {
+export const loadPlugins = async (): Promise<void> => {
   LOGGER.info("Start load plugins.");
   const pluginDirs: string[] = await readDir(PLUGIN_MANAGER.getPluginRoot());
   for (const pluginDir of pluginDirs) {
@@ -60,13 +62,25 @@ const checkAndLoadPluginManifest = async (pluginDirName: string): Promise<Plugin
 };
 
 /**
- * 插件工具类
+ * 主渲染进程代理方法执行监听函数
+ *
+ * @template T 目标函数类型
+ * @param {string} aspectName 切面名称
+ * @param {string} traceId 请求Id
+ * @param {Parameters<T>} args 参数
+ * @returns {ReturnType<T>} 返回值
  */
-export interface PluginUtilType {
-  loadPlugins: LoadPlugins;
-}
-
-export const PluginUtil: PluginUtilType = {
-  loadPlugins,
+export const callAspectProxy = <T extends (...args: any[]) => any>(aspectName: string, traceId: string, ...args: Parameters<T>): ReturnType<T> => {
+  return createAspectProxy((...args: Parameters<T>): ReturnType<T> => {
+    const result: IpcReturnMessage<ReturnType<T>> = callRender(ForwardedRenderApi.MAIN_WINDOW_PLUGIN_PROXY_TARGET_PROCEED, aspectName, traceId, ...args);
+    if (!result.status) {
+      const throwable = new Error(result.message);
+      if (result.error) {
+        throwable.cause = result.error;
+      }
+      LOGGER.error(`Call proxy ${aspectName} failed: ${result.message}.\n`, throwable);
+      throw throwable;
+    }
+    return result.data!;
+  }, aspectName)(...args);
 };
-

@@ -168,7 +168,6 @@ export const createAspectProxy: CreateAspectProxy = <T extends (...args: any[]) 
  * 扫描并加载插件
  */
 export const loadPlugins = async (): Promise<void> => {
-  LOGGER.info("Start load plugins.");
   callRender(ForwardedRenderApi.PLUGIN_WINDOW_LOAD_ALL_PLUGINS);
-  LOGGER.info("Plugins loading completed.");
+  LOGGER.info("Start loading plugins.");
 };

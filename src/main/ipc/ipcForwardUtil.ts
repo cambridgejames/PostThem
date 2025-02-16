@@ -93,4 +93,5 @@ export const setupRender2RenderIpc = (): void => {
   ipcMain.on(IpcForwardChannel.RENDER_TO_RENDER_REGISTER_CHANNEL, registerRenderFunctionSync);
   ipcMain.removeListener(IpcForwardChannel.RENDER_TO_RENDER_CHANNEL, callRenderFunctionSync);
   ipcMain.on(IpcForwardChannel.RENDER_TO_RENDER_CHANNEL, callRenderFunctionSync);
+  ipcMain.on("aaa", (event: IpcMainEvent) => { console.log(1234); event.returnValue = "test"; });
 };

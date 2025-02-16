@@ -25,7 +25,7 @@ export default defineConfig({
       rollupOptions: {
         input: {
           mainWindow: resolve(__dirname, "./src/preload/mainWindow"),
-          pluginWindow: resolve(__dirname, "./src/preload/pluginWindow"),
+          pluginWindow: resolve(__dirname, "./src/preload/pluginProcess"),
         },
       },
     },
