@@ -1,5 +1,5 @@
 import { exposeApiForWeb } from "@preload/common/util/apiExposeUtil";
-import { utils } from "@preload/mainWindow/util";
+import { utils } from "@preload/webProcess/util";
 import { getLogger } from "@preload/common/util/loggerUtil";
 import { LoggerChannel } from "@common/model/ipcChannelModels";
 

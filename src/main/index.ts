@@ -24,7 +24,7 @@ const mainWindowOption: BrowserWindowConstructorOptions = {
   webPreferences: {
     webviewTag: true,
     sandbox: false,
-    preload: path.join(__dirname, "../preload/mainWindow.js"),
+    preload: path.join(__dirname, "../preload/webProcess.js"),
   },
 };
 const pluginWindowOption: BrowserWindowConstructorOptions = {
@@ -32,7 +32,7 @@ const pluginWindowOption: BrowserWindowConstructorOptions = {
   show: false,
   webPreferences: {
     sandbox: false,
-    preload: path.join(__dirname, "../preload/pluginWindow.js"),
+    preload: path.join(__dirname, "../preload/pluginProcess.js"),
   },
 };
 

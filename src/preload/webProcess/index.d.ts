@@ -1,4 +1,4 @@
-import { Utils } from "@preload/mainWindow/util";
+import { Utils } from "@preload/webProcess/util";
 import { Logger } from "@sdk/index";
 
 declare global {
