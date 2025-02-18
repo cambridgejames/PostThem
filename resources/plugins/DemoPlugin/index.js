@@ -1,10 +1,12 @@
+const LOGGER = window.log.getLogger();
+
 const beforeAspect = value => {
   return [`plugin ${value}`];
 };
 
 const aroundAspect = target => {
   target.getArgs()[0] = `demo ${target.getArgs()[0]}`;
-  window.logger.trace(`function "postThem.homePage.sayHello" has been called, args: ${target.getArgs()}`);
+  LOGGER.trace(`function "postThem.homePage.sayHello" has been called, args: ${target.getArgs()}`);
   return `${target.proceed()} Welcome!`;
 };
 

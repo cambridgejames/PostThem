@@ -5,7 +5,7 @@ import * as StringUtil from "@common/util/stringUtil";
 
 import * as path from "path";
 
-import DefaultConfigure from "@preload/configure";
+import DefaultConfigure from "@common/configure";
 
 const CONFIG_FILE_PATH: string = "configure";
 const CONFIG_FILE_NAME_SUFFIX: string = ".user.json";

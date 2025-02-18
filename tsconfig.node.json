@@ -4,7 +4,7 @@
     "electron.vite.config.*",
     "src/main/**/*",
     "src/preload/**/*",
-    "src/preload/*.d.ts",
+    "src/preload/**/*.d.ts",
     "src/common/**/*",
     "src/interface/**/*",
     "resources/sdk/**/*",

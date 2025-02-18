@@ -1,12 +1,19 @@
 <template>
-  {{ sayHelloProxy("world") }}
+  {{ helloStr }}
 </template>
 
 <script setup lang="ts">
-const sayHello = (value: string): string => {
+import { onMounted, ref } from "vue";
+
+const helloStr = ref<string>();
+
+const sayHello = window.utils.PluginUtil.createAspectProxy((value: string): string => {
   return `Hello, ${value}!`;
-};
-const sayHelloProxy = window.plugins.AspectUtil.createAspectProxy(sayHello, "postThem.homePage.sayHello");
+}, "postThem.homePage.sayHello");
+
+onMounted(async () => {
+  helloStr.value = await sayHello("world");
+});
 </script>
 
 <style scoped>

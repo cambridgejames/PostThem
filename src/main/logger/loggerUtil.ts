@@ -1,6 +1,6 @@
 import { ipcMain } from "electron/main";
 import { Logger } from "log4js";
-import { LoggerChannel } from "@common/ipc/ipcChannel";
+import { LoggerChannel } from "@common/model/ipcChannelModels";
 import { LoggerLevel } from "@interface/common";
 import { LoggerManager } from "@main/logger/loggerManager";
 
@@ -73,4 +73,6 @@ export const setupRenderLogging = (): void => {
   ipcMain.on(LoggerChannel.LOGGER_LOG_MESSAGE_WEB, logWeb);
   ipcMain.removeListener(LoggerChannel.LOGGER_LOG_MESSAGE_PLUGIN, logPlugin);
   ipcMain.on(LoggerChannel.LOGGER_LOG_MESSAGE_PLUGIN, logPlugin);
+  ipcMain.removeListener(LoggerChannel.LOGGER_LOG_MESSAGE_DEFAULT, logPreload);
+  ipcMain.on(LoggerChannel.LOGGER_LOG_MESSAGE_DEFAULT, logPreload);
 };
