@@ -1,10 +1,9 @@
-import { Logger } from "@sdk/index";
-import { IpcReturnMessage } from "@interface/common";
 import { LoggerChannel } from "@common/model/ipcChannelModels";
 import { readDir, readFile } from "@common/util/fileUtil";
+import { AnyFunction, AsyncFunction, IpcReturnMessage } from "@interface/common";
 import { ForwardedRenderApi } from "@preload/common/forwardedRenderApi";
-import { RenderLogger } from "@preload/common/util/loggerUtil";
 import { callRender } from "@preload/common/util/ipcRenderUtil";
+import { RenderLogger } from "@preload/common/util/loggerUtil";
 import {
   checkAndParseManifest,
   ManifestCheckResult,
@@ -12,6 +11,7 @@ import {
 } from "@preload/pluginProcess/plugin/manifestChecker";
 import { PluginManager } from "@preload/pluginProcess/plugin/pluginManager";
 import { createAspectProxy } from "@preload/pluginProcess/util/aspectUtil";
+import { Logger } from "@sdk/index";
 
 import * as path from "node:path";
 
@@ -70,8 +70,8 @@ const checkAndLoadPluginManifest = async (pluginDirName: string): Promise<Plugin
  * @param {Parameters<T>} args 参数
  * @returns {ReturnType<T>} 返回值
  */
-export const callAspectProxy = <T extends (...args: any[]) => any>(aspectName: string, traceId: string, ...args: Parameters<T>): ReturnType<T> => {
-  return createAspectProxy((...args: Parameters<T>): ReturnType<T> => {
+export const callAspectProxy = async <T extends AnyFunction>(aspectName: string, traceId: string, ...args: Parameters<T>): ReturnType<AsyncFunction<T>> => {
+  return createAspectProxy((...args: Parameters<T>): ReturnType<AsyncFunction<T>> => {
     const result: IpcReturnMessage<ReturnType<T>> = callRender(ForwardedRenderApi.MAIN_WINDOW_PLUGIN_PROXY_TARGET_PROCEED, aspectName, traceId, ...args);
     if (!result.status) {
       const throwable = new Error(result.message);

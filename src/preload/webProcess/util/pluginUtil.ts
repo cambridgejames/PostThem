@@ -1,8 +1,8 @@
-import { CreateAspectProxy, Logger } from "@sdk/index";
+import { Logger } from "@sdk/index";
 import { LoggerChannel } from "@common/model/ipcChannelModels";
-import { IpcReturnMessage } from "@interface/common";
+import { AnyFunction, AsyncFunction, IpcReturnMessage } from "@interface/common";
 import { RenderLogger } from "@preload/common/util/loggerUtil";
-import { callRender, registerOnRender } from "@preload/common/util/ipcRenderUtil";
+import { callRender, callRenderAsync, registerOnRender } from "@preload/common/util/ipcRenderUtil";
 import { ForwardedRenderApi } from "@preload/common/forwardedRenderApi";
 
 import * as StringUtil from "@common/util/stringUtil";
@@ -56,14 +56,14 @@ class TargetProxy<T extends (...args: any[]) => any> {
  *
  * @template T 目标函数类型
  */
-class ProxyManager<T extends (...args: any[]) => any> {
+class ProxyManager<T extends AnyFunction> {
   private static INSTANCE: ProxyManager<any>;
 
   private readonly _proxyMap: Map<string, T> = new Map();
   private readonly _proxyTraceMap: Map<string, Map<string, TargetProxy<T>>> = new Map();
 
   private constructor() {
-    const proceedTargetByTraceId = (aspectName: string, traceId: string, ...args: any[]): any => {
+    const proceedTargetByTraceId = async (aspectName: string, traceId: string, ...args: any[]): Promise<any> => {
       if (!this._proxyMap.has(aspectName) || !this._proxyTraceMap.get(aspectName)?.has(traceId)) {
         throw new Error(`Proceed target failed: aspect "${aspectName}" not found.`);
       }
@@ -79,7 +79,7 @@ class ProxyManager<T extends (...args: any[]) => any> {
    * @template T aaa
    * @return {ProxyManager<T>} 目标函数代理类实例
    */
-  public static getInstance<T extends (...args: any[]) => any>(): ProxyManager<T> {
+  public static getInstance<T extends AnyFunction>(): ProxyManager<T> {
     if (!this.INSTANCE) {
       this.INSTANCE = new ProxyManager<T>();
     }
@@ -91,9 +91,9 @@ class ProxyManager<T extends (...args: any[]) => any> {
    *
    * @param {T} target 目标函数
    * @param {string} aspectName 切面名称
-   * @returns {T} 目标函数的代理
+   * @returns {AsyncFunction<T>} 目标函数的代理
    */
-  public registerProxy(target: T, aspectName: string): T {
+  public registerProxy(target: T, aspectName: string): AsyncFunction<T> {
     if (StringUtil.isEmpty(aspectName)) {
       LOGGER.warn("Skip to create proxy, aspect name is empty.");
       return target;
@@ -103,7 +103,7 @@ class ProxyManager<T extends (...args: any[]) => any> {
     }
     this._proxyMap.set(aspectName, target);
     this._proxyTraceMap.set(aspectName, new Map());
-    return ((...args: Parameters<T>): ReturnType<T> => {
+    return (async (...args: Parameters<T>): Promise<ReturnType<T>> => {
       if (this._proxyMap.get(aspectName) !== target || !this._proxyTraceMap.has(aspectName)) {
         LOGGER.warn(`Skip to call proxy, target proxy of "${aspectName}" not found. The original function will be executed.`);
         return target(...args); // 如果代理被移除，就直接执行原函数
@@ -111,11 +111,11 @@ class ProxyManager<T extends (...args: any[]) => any> {
       const targetProxy: TargetProxy<T> = new TargetProxy(target);
       try {
         this._proxyTraceMap.get(aspectName)!.set(targetProxy.traceId, targetProxy);
-        return this.doProxy(targetProxy, aspectName, ...args);
+        return await this.doProxy(targetProxy, aspectName, ...args);
       } finally {
         this._proxyTraceMap.get(aspectName)!.delete(targetProxy.traceId);
       }
-    }) as T;
+    }) as ((...args: Parameters<T>) => Promise<ReturnType<T>>);
   }
 
   /**
@@ -124,10 +124,10 @@ class ProxyManager<T extends (...args: any[]) => any> {
    * @param {TargetProxy<T>} target 目标函数
    * @param {string} aspectName 被调函数名称
    * @param {Parameters<T>} args 参数
-   * @returns {IpcReturnMessage<T>} 返回值
+   * @returns {Promise<ReturnType<T>>} 返回值
    */
-  private doProxy(target: TargetProxy<T>, aspectName: string, ...args: Parameters<T>): ReturnType<T> {
-    const result: IpcReturnMessage<ReturnType<T>> = this.callRender(aspectName, target.traceId, ...args);
+  private async doProxy(target: TargetProxy<T>, aspectName: string, ...args: Parameters<T>): Promise<ReturnType<T>> {
+    const result: IpcReturnMessage<ReturnType<T>> = await this.callRender(aspectName, target.traceId, ...args);
     if (!result.status) {
       const throwable = new Error(result.message);
       if (result.error) {
@@ -145,10 +145,10 @@ class ProxyManager<T extends (...args: any[]) => any> {
    * @param {string} aspectName 被调函数名称
    * @param {string} traceId 请求Id
    * @param {Parameters<T>} args 参数
-   * @returns {IpcReturnMessage<T>} 返回值
+   * @returns {Promise<IpcReturnMessage<ReturnType<T>>>} 返回值
    */
-  private callRender(aspectName: string, traceId: string, ...args: Parameters<T>): IpcReturnMessage<ReturnType<T>> {
-    return callRender(ForwardedRenderApi.PLUGIN_WINDOW_CALL_ASPECT_PROXY, aspectName, traceId, ...args);
+  private async callRender(aspectName: string, traceId: string, ...args: Parameters<T>): Promise<IpcReturnMessage<ReturnType<T>>> {
+    return await callRenderAsync(ForwardedRenderApi.PLUGIN_WINDOW_CALL_ASPECT_PROXY, aspectName, traceId, ...args);
   }
 }
 
@@ -158,9 +158,10 @@ class ProxyManager<T extends (...args: any[]) => any> {
  * @template T 目标函数类型
  * @param {T} target 目标函数
  * @param {string} aspectName 切面名称
- * @returns {T} 目标函数的代理
+ * @returns {((...args: Parameters<T>) => Promise<ReturnType<T>>)} 目标函数的代理
  */
-export const createAspectProxy: CreateAspectProxy = <T extends (...args: any[]) => any>(target: T, aspectName: string): T => {
+export const createAspectProxy = <T extends (...args: any[]) => any>(target: T, aspectName: string):
+  ((...args: Parameters<T>) => Promise<ReturnType<T>>) => {
   return ProxyManager.getInstance<T>().registerProxy(target, aspectName);
 };
 

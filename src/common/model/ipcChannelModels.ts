@@ -13,6 +13,7 @@ export enum LoggerChannel {
 export enum IpcForwardChannel {
   RENDER_TO_RENDER_REGISTER_CHANNEL = "render_to_render_register",
   RENDER_TO_RENDER_CHANNEL = "render_to_render",
+  RENDER_TO_RENDER_ASYNC_CHANNEL = "render_to_render_async",
   RENDER_TO_RENDER_RETURN_CHANNEL = "render_to_render_return",
 }
 

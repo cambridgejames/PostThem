@@ -85,6 +85,41 @@ const callRenderFunctionSync = (event: IpcMainEvent, functionName: string, ...ar
 };
 
 /**
+ * 调用指定渲染进程的Api
+ *
+ * @param _
+ * @param {string} functionName Api名称
+ * @param {any[]} args 参数
+ * @returns {Promise<IpcReturnMessage<any>>} 渲染进程的返回值
+ */
+const callRenderFunctionAsync = async (_, functionName: string, ...args: any[]): Promise<IpcReturnMessage<any>> => {
+  const renderName: any = IPC_RENDER_MANAGER.getRenderName(functionName);
+  if (!renderName) {
+    LOGGER.error(`Call function "${functionName}" failed: target api not found.`);
+    return {
+      status: false,
+      message: IpcReturnMessageCode.API_NOT_FOUND,
+    } as IpcReturnMessage<boolean>;
+  }
+  const targetWebContents: WebContents | undefined = RENDER_WEB_CONTENTS_CACHE.get(renderName);
+  if (!targetWebContents) {
+    LOGGER.error(`Call function "${functionName}" in "${renderName}" failed: browser window not found.`);
+    return {
+      status: false,
+      message: IpcReturnMessageCode.BROWSER_WINDOW_NOT_FOUND,
+    } as IpcReturnMessage<boolean>;
+  }
+  return new Promise(resolve => {
+    ipcMain.once(`${IpcForwardChannel.RENDER_TO_RENDER_RETURN_CHANNEL}_${functionName}`, (_, returnValue) => {
+      LOGGER.trace(`Call function "${functionName}" in "${renderName}" succeeded: received return value from target window.`);
+      resolve(returnValue);
+    });
+    targetWebContents.send(`${IpcForwardChannel.RENDER_TO_RENDER_CHANNEL}_${functionName}`, ...args);
+    LOGGER.trace(`Call function "${functionName}" in "${renderName}" succeeded: send message to target window.`);
+  });
+};
+
+/**
  * 初始化主进程转发跨渲染进程Api调用消息监听方法
  */
 export const setupRender2RenderIpc = (): void => {
@@ -93,5 +128,6 @@ export const setupRender2RenderIpc = (): void => {
   ipcMain.on(IpcForwardChannel.RENDER_TO_RENDER_REGISTER_CHANNEL, registerRenderFunctionSync);
   ipcMain.removeListener(IpcForwardChannel.RENDER_TO_RENDER_CHANNEL, callRenderFunctionSync);
   ipcMain.on(IpcForwardChannel.RENDER_TO_RENDER_CHANNEL, callRenderFunctionSync);
-  ipcMain.on("aaa", (event: IpcMainEvent) => { console.log(1234); event.returnValue = "test"; });
+  ipcMain.removeListener(IpcForwardChannel.RENDER_TO_RENDER_ASYNC_CHANNEL, callRenderFunctionSync);
+  ipcMain.handle(IpcForwardChannel.RENDER_TO_RENDER_ASYNC_CHANNEL, callRenderFunctionAsync);
 };

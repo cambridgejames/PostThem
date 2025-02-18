@@ -48,6 +48,9 @@ export interface WebviewConfigureItem {
 export interface WebviewConfigure extends Configure<Array<WebviewConfigureItem>> {
 }
 
+export type AnyFunction = (...args: any[]) => any;
+export type AsyncFunction<T extends AnyFunction> = (...args: Parameters<T>) => Promise<ReturnType<T>>;
+
 /**
  * Ipc通信通用返回消息体
  */
