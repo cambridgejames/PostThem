@@ -1,4 +1,4 @@
-import { PluginManifest } from "@preload/pluginWindow/plugin/manifestChecker";
+import { PluginManifest } from "@preload/pluginProcess/plugin/manifestChecker";
 import { AfterAspect, AroundAspect, BeforeAspect, Logger } from "@sdk/index";
 import { RenderLogger } from "@preload/common/util/loggerUtil";
 import { LoggerChannel } from "@common/model/ipcChannelModels";
@@ -23,7 +23,9 @@ interface PluginPreloadEntry {
 class ManagedPlugin implements PluginPreloadEntry {
   public readonly manifest: PluginManifest;
   public readonly pluginPath: string;
-  private readonly preloadEntry?: PluginPreloadEntry;
+
+  private _mounted: boolean = false;
+  private _preloadEntry?: PluginPreloadEntry;
   // private readonly webEntry?: string;
 
   /**
@@ -32,17 +34,38 @@ class ManagedPlugin implements PluginPreloadEntry {
    * @param manifest 插件配置信息
    * @param pluginPath 插件根目录
    */
-  constructor(manifest: PluginManifest, pluginPath: string) {
+  public constructor(manifest: PluginManifest, pluginPath: string) {
     this.manifest = Object.freeze(manifest);
     this.pluginPath = pluginPath;
-    if (manifest.entry.preload) {
-      const preloadEntry: string = path.resolve(FileUtil.getConfigPath(path.join(PLUGIN_DIR_NAME, pluginPath, manifest.entry.preload)));
-      this.preloadEntry = require(preloadEntry) as PluginPreloadEntry;
-    }
   }
 
-  async onMount(): Promise<void> {
-    setTimeout(() => this.preloadEntry?.onMount?.(), 1);
+  /**
+   * 插件准备事件
+   *
+   * @returns {Promise<void>}
+   */
+  public async onMount(): Promise<void> {
+    if (this._mounted) {
+      LOGGER.warn(`Plugin ${this.manifest.uniqueId} is already mounted.`);
+      return;
+    }
+    setTimeout(() => {
+      this.initEntry(); // 只能在mount事件中调用，防止插件管理器校验插件路径失败
+      this._mounted = true;
+    }, 1);
+  }
+
+  /**
+   * 初始化插件入口
+   *
+   * @private
+   */
+  private initEntry(): void {
+    if (!StringUtil.isEmpty(this.manifest.entry.preload)) {
+      const preloadEntry: string = path.join(PLUGIN_DIR_NAME, this.pluginPath, this.manifest.entry.preload!);
+      this._preloadEntry = require(path.resolve(FileUtil.getConfigPath(preloadEntry))) as PluginPreloadEntry;
+      this._preloadEntry?.onMount?.();
+    }
   }
 }
 
@@ -217,7 +240,7 @@ export class PluginManager {
    * @return {ManagedPlugin | null} 插件
    * @private
    */
-  private findByCallStack(startIndex: number = 2): ManagedPlugin | null {
+  public findByCallStack(startIndex: number = 2): ManagedPlugin | null {
     const stack: string[] | undefined = new Error().stack?.split("\n").slice(1);
     if (!stack || stack.length <= startIndex) {
       return null;

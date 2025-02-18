@@ -7,7 +7,7 @@ import { Logger } from "@sdk/index";
  * 渲染进程Logger类
  */
 export class RenderLogger implements Logger {
-  private static INSTANCE_MAP: Map<LoggerChannel, RenderLogger> = new Map();
+  private static INSTANCE_MAP: Map<string, RenderLogger> = new Map();
 
   private readonly _ipcChannel: LoggerChannel;
   private readonly _pluginId: string | undefined;
@@ -25,10 +25,11 @@ export class RenderLogger implements Logger {
    * @return {Logger} 渲染进程Logger实例
    */
   public static getInstance(channel: LoggerChannel, pluginId?: string): Logger {
-    if (!this.INSTANCE_MAP.has(channel)) {
-      this.INSTANCE_MAP.set(channel, new RenderLogger(channel, pluginId));
+    const instanceKey: string = `LoggerKey_${channel}_${pluginId || "default"}`;
+    if (!this.INSTANCE_MAP.has(instanceKey)) {
+      this.INSTANCE_MAP.set(instanceKey, new RenderLogger(channel, pluginId));
     }
-    return this.INSTANCE_MAP.get(channel)!;
+    return this.INSTANCE_MAP.get(instanceKey)!;
   }
 
   public trace(message: any, ...args: any[]): void {

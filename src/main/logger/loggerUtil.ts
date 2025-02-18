@@ -73,4 +73,6 @@ export const setupRenderLogging = (): void => {
   ipcMain.on(LoggerChannel.LOGGER_LOG_MESSAGE_WEB, logWeb);
   ipcMain.removeListener(LoggerChannel.LOGGER_LOG_MESSAGE_PLUGIN, logPlugin);
   ipcMain.on(LoggerChannel.LOGGER_LOG_MESSAGE_PLUGIN, logPlugin);
+  ipcMain.removeListener(LoggerChannel.LOGGER_LOG_MESSAGE_DEFAULT, logPreload);
+  ipcMain.on(LoggerChannel.LOGGER_LOG_MESSAGE_DEFAULT, logPreload);
 };
