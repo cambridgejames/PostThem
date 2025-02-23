@@ -27,6 +27,7 @@
     "jsonpath": "^1.1.1",
     "jsonpath-plus": "^10.2.0",
     "log4js": "^6.9.1",
+    "portfinder": "^1.0.32",
     "vue-router": "^4.5.0"
   },
   "devDependencies": {

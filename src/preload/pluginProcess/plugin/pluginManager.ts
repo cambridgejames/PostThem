@@ -1,4 +1,4 @@
-import { PluginManifest } from "@preload/pluginProcess/plugin/manifestChecker";
+import { PluginManifest } from "@interface/manifest";
 import { AfterAspect, AroundAspect, BeforeAspect, Logger } from "@sdk/index";
 import { RenderLogger } from "@preload/common/util/loggerUtil";
 import { LoggerChannel } from "@common/model/ipcChannelModels";

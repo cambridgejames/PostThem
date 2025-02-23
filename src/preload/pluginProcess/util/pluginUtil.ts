@@ -1,14 +1,11 @@
 import { LoggerChannel } from "@common/model/ipcChannelModels";
 import { readDir, readFile } from "@common/util/fileUtil";
 import { AnyFunction, AsyncFunction, IpcReturnMessage } from "@interface/common";
+import { PluginManifest } from "@interface/manifest";
 import { ForwardedRenderApi } from "@preload/common/forwardedRenderApi";
 import { callRender } from "@preload/common/util/ipcRenderUtil";
 import { RenderLogger } from "@preload/common/util/loggerUtil";
-import {
-  checkAndParseManifest,
-  ManifestCheckResult,
-  PluginManifest,
-} from "@preload/pluginProcess/plugin/manifestChecker";
+import { checkAndParseManifest, ManifestCheckResult } from "@preload/pluginProcess/plugin/manifestChecker";
 import { PluginManager } from "@preload/pluginProcess/plugin/pluginManager";
 import { createAspectProxy } from "@preload/pluginProcess/util/aspectUtil";
 import { Logger } from "@sdk/index";

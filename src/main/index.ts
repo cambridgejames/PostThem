@@ -1,3 +1,4 @@
+import { setupServer } from "@main/http";
 import { LoggerManager } from "@main/logger/loggerManager";
 import { setupRender2RenderIpc } from "@main/ipc/ipcForwardUtil";
 import { setupRenderLogging } from "@main/logger/loggerUtil";
@@ -54,7 +55,7 @@ const createHiddenWindow = (hiddenWindowOption: BrowserWindowConstructorOptions)
     <body/>
   </html>`).then(() => {});
   if (is.dev && process.env["ELECTRON_RENDERER_URL"]) {
-    hiddenWindow.webContents.openDevTools();
+    // hiddenWindow.webContents.openDevTools();
   }
 };
 
@@ -76,6 +77,7 @@ const createWindow = (): void => {
 
 app.whenReady().then(() => {
   electronApp.setAppUserModelId("powerinv.postThem.client");
+  setupServer().then(() => {});
   setupRenderLogging();
   setupRender2RenderIpc();
   app.on("browser-window-created", (_, window) => {

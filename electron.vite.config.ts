@@ -24,8 +24,9 @@ export default defineConfig({
     build: {
       rollupOptions: {
         input: {
-          webProcess: resolve(__dirname, "./src/preload/webProcess"),
+          entryProcess: resolve(__dirname, "./src/preload/entryProcess"),
           pluginProcess: resolve(__dirname, "./src/preload/pluginProcess"),
+          webProcess: resolve(__dirname, "./src/preload/webProcess"),
         },
       },
     },
