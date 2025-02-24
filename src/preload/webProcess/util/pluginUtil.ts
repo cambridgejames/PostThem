@@ -1,3 +1,4 @@
+import { formatException } from "@common/util/exceptionUtil";
 import { Logger } from "@sdk/index";
 import { LoggerChannel } from "@common/model/ipcChannelModels";
 import { AnyFunction, AsyncFunction, IpcReturnMessage } from "@interface/common";
@@ -45,7 +46,7 @@ class TargetProxy<T extends (...args: any[]) => any> {
       this._targetResult = this._target(...args);
       return this._targetResult!;
     } catch (exception) {
-      this._exception = exception instanceof Error ? exception : new Error(exception);
+      this._exception = formatException(this._exception);
       throw this._exception;
     }
   }

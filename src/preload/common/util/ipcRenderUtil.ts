@@ -1,3 +1,4 @@
+import { formatException } from "@common/util/exceptionUtil";
 import { ipcRenderer } from "electron/renderer";
 import { AnyFunction, AsyncFunction, IpcError, IpcReturnMessage } from "@interface/common";
 import { IpcForwardChannel, IpcReturnMessageCode, LoggerChannel } from "@common/model/ipcChannelModels";
@@ -58,7 +59,7 @@ export const registerOnRender = <T extends AnyFunction>(functionName: ForwardedR
       result = {
         status: false,
         message: IpcReturnMessageCode.TARGET_API_CAUSED_EXCEPTION,
-        error: new IpcError(exception instanceof Error ? exception : new Error(exception)),
+        error: new IpcError(formatException(exception)),
       } as IpcReturnMessage<ReturnType<T>>;
     }
     ipcRenderer.send(`${IpcForwardChannel.RENDER_TO_RENDER_RETURN_CHANNEL}_${functionName}`, result);

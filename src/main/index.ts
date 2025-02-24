@@ -1,4 +1,4 @@
-import { setupServer } from "@main/http";
+import { setupServer } from "@main/http/httpUtil";
 import { LoggerManager } from "@main/logger/loggerManager";
 import { setupRender2RenderIpc } from "@main/ipc/ipcForwardUtil";
 import { setupRenderLogging } from "@main/logger/loggerUtil";
@@ -47,7 +47,6 @@ const createHiddenWindow = (hiddenWindowOption: BrowserWindowConstructorOptions)
     <head>
       <meta charset="UTF-8" />
       <title>${hiddenWindowOption.title}</title>
-      <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
       <meta http-equiv="Content-Security-Policy"
         content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:"
       />
