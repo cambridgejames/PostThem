@@ -23,6 +23,7 @@ interface PluginPreloadEntry {
 class ManagedPlugin implements PluginPreloadEntry {
   public readonly manifest: PluginManifest;
   public readonly pluginPath: string;
+  public readonly contextPath: string;
 
   private _mounted: boolean = false;
   private _preloadEntry?: PluginPreloadEntry;
@@ -33,10 +34,12 @@ class ManagedPlugin implements PluginPreloadEntry {
    *
    * @param manifest 插件配置信息
    * @param pluginPath 插件根目录
+   * @param contextPath Http上下文路径
    */
-  public constructor(manifest: PluginManifest, pluginPath: string) {
+  public constructor(manifest: PluginManifest, pluginPath: string, contextPath: string) {
     this.manifest = Object.freeze(manifest);
     this.pluginPath = pluginPath;
+    this.contextPath = contextPath;
   }
 
   /**
@@ -114,16 +117,20 @@ export class PluginManager {
    *
    * @param manifest 插件配置信息
    * @param pluginPath 插件根目录
+   * @param contextPath Http上下文路径
    */
-  public register(manifest: PluginManifest, pluginPath: string): void {
+  public register(manifest: PluginManifest, pluginPath: string, contextPath: string): boolean {
+    let result: boolean = true;
     if (this.managedPluginMap.has(manifest.uniqueId)) {
       LOGGER.warn(`Plugin '${manifest.uniqueId}' already registered and will be overwritten.`);
       this.removeAspectsByPluginId(manifest.uniqueId);
+      result = false;
     }
-    const managedPlugin: ManagedPlugin = new ManagedPlugin(manifest, pluginPath);
+    const managedPlugin: ManagedPlugin = new ManagedPlugin(manifest, pluginPath, contextPath);
     this.managedPluginMap.set(manifest.uniqueId, managedPlugin);
     managedPlugin.onMount().then(() => {});
     LOGGER.info(`Registered plugin: "${manifest.name}".`);
+    return result;
   }
 
   /**

@@ -1,5 +1,5 @@
 /**
- * 日志记录Ipc通道
+ * 日志记录Ipc调用通道
  */
 export enum LoggerChannel {
   LOGGER_LOG_MESSAGE_PRELOAD = "log_message_preload",
@@ -17,6 +17,14 @@ export enum IpcForwardChannel {
   RENDER_TO_RENDER_CHANNEL = "render_to_render",
   RENDER_TO_RENDER_ASYNC_CHANNEL = "render_to_render_async",
   RENDER_TO_RENDER_RETURN_CHANNEL = "render_to_render_return",
+}
+
+/**
+ * 公共Ipc调用通道
+ */
+export enum CommonChannel {
+  COMMON_HTTP_SERVER_PORT_GETTER = "http_server_port_getter",
+  COMMON_PLUGIN_WEB_ENTRY_REGISTER = "plugin_web_entry_register",
 }
 
 /**

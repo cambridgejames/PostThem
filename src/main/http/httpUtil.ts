@@ -1,14 +1,16 @@
+import { CommonChannel } from "@common/model/ipcChannelModels";
 import { formatException } from "@common/util/exceptionUtil";
 import { isEmpty } from "@common/util/stringUtil";
 import { LoggerManager } from "@main/logger/loggerManager";
 import { Logger } from "@sdk/index";
+import { ipcMain } from "electron/main";
 import { createServer, IncomingMessage, ServerResponse } from "node:http";
 import { getPortPromise } from "portfinder";
 
 const LOGGER: Logger = LoggerManager.getInstance().getNormalLogger("root");
 const PORT_GETTER_MINIMUM_PORT: number = 30000;
 
-interface HttpRequest {
+export interface HttpRequest {
   path: string;
   fullPath: string;
   method: string;
@@ -89,7 +91,7 @@ class ContextPathManager {
  */
 const httpRequestListener = async (request: IncomingMessage, response: ServerResponse): Promise<void> => {
   const httpRequest: HttpRequest = await parseHttpRequest(request);
-  const contextPath = parseContextPath(httpRequest);
+  const contextPath: string | undefined = parseContextPath(httpRequest);
   if (contextPath) {
     const httpCallback: HttpCallback | undefined = ContextPathManager.getInstance().getCallback(contextPath);
     if (httpCallback) {
@@ -109,7 +111,7 @@ const httpRequestListener = async (request: IncomingMessage, response: ServerRes
   }
   LOGGER.warn(`[HTTP SERVER] Resource "${httpRequest.path}" not found.`);
   response.writeHead(404, { "Content-Type": "text/plain" });
-  response.end(`Resource "${httpRequest.path}" not found.`, "utf-8");
+  response.end(`Resource "${httpRequest.path}" not found.\n${JSON.stringify(httpRequest, null, 2)}`, "utf-8");
 };
 
 /**
@@ -166,7 +168,12 @@ export const registerContextPath = (callback: HttpCallback): string => {
  * @returns {Promise<void>} 初始化结果
  */
 export const setupServer = async (callback?: () => {}): Promise<void> => {
+  let currentPort: number = -1;
+  const portGetter = () => currentPort;
+  ipcMain.removeListener(CommonChannel.COMMON_HTTP_SERVER_PORT_GETTER, portGetter);
+  ipcMain.handle(CommonChannel.COMMON_HTTP_SERVER_PORT_GETTER, portGetter);
   getPortPromise({ port: PORT_GETTER_MINIMUM_PORT }).then(port => {
+    currentPort = port;
     LOGGER.info(`[HTTP SERVER] Http server starting at ${port}.`);
     createServer(httpRequestListener).listen(port, () => {
       LOGGER.info(`[HTTP SERVER] Http server started on port ${port}, Calling back.`);

@@ -1,6 +1,6 @@
 <template>
   <webview ref="webview" :key="props.src" class="plugin-webview-container"
-           :src="`https://localhost:30000/${props.src}`" :preload="`file://${preloadPath}`"
+           :src="`https://localhost:${httpPort}/${props.src}`" :preload="`file://${preloadPath}`"
            :partition="`persist:PLUGIN_${props.src}`" />
 </template>
 
@@ -12,6 +12,7 @@ const props = defineProps({
   },
 });
 
+const httpPort: number = window.utils.HttpUtil.getHttpPort();
 const preloadPath: string = window.utils.PathUtil.getPreloadDir("entryProcess.js");
 </script>
 

@@ -82,13 +82,13 @@ const checkEntry = async (entry: PluginEntry, pluginPath: string): Promise<Manif
       return buildManifestCheckResult(false, ManifestCheckMessage.ENTRY_FILE_NOT_FOUND, [entry.preload]);
     }
   }
-  if (entry.web) {
+  if (entry.webview) {
     hasEntry = true;
-    if (!FileUtil.isLegal(entry.web)) {
-      return buildManifestCheckResult(false, ManifestCheckMessage.ENTRY_FILE_PATH_ILLEGAL, [entry.web]);
+    if (!FileUtil.isLegal(entry.webview)) {
+      return buildManifestCheckResult(false, ManifestCheckMessage.ENTRY_FILE_PATH_ILLEGAL, [entry.webview]);
     }
-    if (!await FileUtil.isExists(path.join(pluginPath, entry.web))) {
-      return buildManifestCheckResult(false, ManifestCheckMessage.ENTRY_FILE_NOT_FOUND, [entry.web]);
+    if (!await FileUtil.isExists(path.join(pluginPath, entry.webview))) {
+      return buildManifestCheckResult(false, ManifestCheckMessage.ENTRY_FILE_NOT_FOUND, [entry.webview]);
     }
   }
   if (!hasEntry) {

@@ -1,4 +1,5 @@
 import { setupServer } from "@main/http/httpUtil";
+import { setupPluginWebEntry } from "@main/http/pluginWebEntry";
 import { LoggerManager } from "@main/logger/loggerManager";
 import { setupRender2RenderIpc } from "@main/ipc/ipcForwardUtil";
 import { setupRenderLogging } from "@main/logger/loggerUtil";
@@ -76,7 +77,9 @@ const createWindow = (): void => {
 
 app.whenReady().then(() => {
   electronApp.setAppUserModelId("powerinv.postThem.client");
-  setupServer().then(() => {});
+  setupServer().then(() => {
+    setupPluginWebEntry();
+  });
   setupRenderLogging();
   setupRender2RenderIpc();
   app.on("browser-window-created", (_, window) => {

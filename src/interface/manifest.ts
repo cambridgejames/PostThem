@@ -16,7 +16,7 @@ export interface PluginManifest {
  */
 export interface PluginEntry {
   preload?: string;
-  web?: string;
+  webview?: string;
 }
 
 /**
