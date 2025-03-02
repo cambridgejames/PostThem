@@ -1,8 +1,7 @@
 import { CommonChannel, LoggerChannel } from "@common/model/ipcChannelModels";
 import { readDir, readFile } from "@common/util/fileUtil";
-import { isEmpty } from "@common/util/stringUtil";
 import { AnyFunction, AsyncFunction, IpcReturnMessage } from "@interface/common";
-import { PluginManifest } from "@interface/manifest";
+import { PluginManifest, ScannedPlugin } from "@interface/manifest";
 import { ForwardedRenderApi } from "@preload/common/forwardedRenderApi";
 import { callRender } from "@preload/common/util/ipcRenderUtil";
 import { RenderLogger } from "@preload/common/util/loggerUtil";
@@ -21,11 +20,6 @@ const PLUGIN_REQUIRED_FILES: string[] = [
 const PLUGIN_MANAGER: PluginManager = PluginManager.getInstance();
 const LOGGER: Logger = RenderLogger.getInstance(LoggerChannel.LOGGER_LOG_MESSAGE_PRELOAD);
 
-interface ScannedPlugin {
-  pluginDir: string;
-  pluginManifest: PluginManifest;
-}
-
 /**
  * 扫描并加载插件
  */
@@ -40,10 +34,9 @@ export const loadPlugins = async (): Promise<void> => {
     }
   }
   LOGGER.info(`Scan plugins finished, ${scannedPlugins.length} plugins found.`);
-  const pluginManifests: PluginManifest[] = scannedPlugins
-    .filter(plugin => !isEmpty(plugin.pluginManifest.entry.webview))
-    .map(plugin => plugin.pluginManifest);
-  const contextPathMap = await ipcRenderer.invoke(CommonChannel.COMMON_PLUGIN_WEB_ENTRY_REGISTER, ...pluginManifests);
+  const webviewPlugins: ScannedPlugin[] = scannedPlugins
+    .filter(plugin => Object.keys(plugin.pluginManifest.entry.webview).length > 0);
+  const contextPathMap = await ipcRenderer.invoke(CommonChannel.COMMON_PLUGIN_WEB_ENTRY_REGISTER, ...webviewPlugins);
   const successCount: number = scannedPlugins.reduce((count, plugin) => {
     return PLUGIN_MANAGER.register(plugin.pluginManifest, plugin.pluginDir, contextPathMap[plugin.pluginManifest.uniqueId])
       ? count + 1 : count;

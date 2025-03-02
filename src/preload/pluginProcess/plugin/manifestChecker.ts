@@ -82,14 +82,19 @@ const checkEntry = async (entry: PluginEntry, pluginPath: string): Promise<Manif
       return buildManifestCheckResult(false, ManifestCheckMessage.ENTRY_FILE_NOT_FOUND, [entry.preload]);
     }
   }
-  if (entry.webview) {
+  if (entry.webview && Object.keys(entry.webview).length > 0) {
     hasEntry = true;
-    if (!FileUtil.isLegal(entry.webview)) {
-      return buildManifestCheckResult(false, ManifestCheckMessage.ENTRY_FILE_PATH_ILLEGAL, [entry.webview]);
+    const entryFiles: string[] = Object.values(entry.webview);
+    for (const entryFile of entryFiles) {
+      if (!FileUtil.isLegal(entryFile)) {
+        return buildManifestCheckResult(false, ManifestCheckMessage.ENTRY_FILE_PATH_ILLEGAL, [entryFile]);
+      }
+      if (!await FileUtil.isExists(path.join(pluginPath, entryFile))) {
+        return buildManifestCheckResult(false, ManifestCheckMessage.ENTRY_FILE_NOT_FOUND, [entryFile]);
+      }
     }
-    if (!await FileUtil.isExists(path.join(pluginPath, entry.webview))) {
-      return buildManifestCheckResult(false, ManifestCheckMessage.ENTRY_FILE_NOT_FOUND, [entry.webview]);
-    }
+  } else {
+    entry.webview = {}; // 初始化一个空的对象方便处理
   }
   if (!hasEntry) {
     return buildManifestCheckResult(false, ManifestCheckMessage.ENTRY_NUMBER_ILLEGAL);

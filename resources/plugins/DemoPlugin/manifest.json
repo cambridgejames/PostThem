@@ -6,7 +6,9 @@
   "uniqueId": "postThem.plugins.demoPlugin",
   "entry": {
     "preload": "index.js",
-    "webview": "index.html"
+    "webview": {
+      "web.homePage.mainTips": "index.html"
+    }
   },
   "aspect": {
     "require": [

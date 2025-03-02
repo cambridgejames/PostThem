@@ -16,7 +16,9 @@ export interface PluginManifest {
  */
 export interface PluginEntry {
   preload?: string;
-  webview?: string;
+  webview: {
+    [contributionPoint: string]: string;
+  };
 }
 
 /**
@@ -25,4 +27,12 @@ export interface PluginEntry {
 export interface PluginAspect {
   require: Array<string>;
   provide: Array<string>;
+}
+
+/**
+ * 扫描到的插件信息类型定义
+ */
+export interface ScannedPlugin {
+  pluginDir: string;
+  pluginManifest: PluginManifest;
 }
