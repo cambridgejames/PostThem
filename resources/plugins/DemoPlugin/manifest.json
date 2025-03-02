@@ -7,7 +7,7 @@
   "entry": {
     "preload": "index.js",
     "webview": {
-      "postThem.webview.homePage.mainTips": "/index.html"
+      "postThem.webview.homePage.mainTips": "/"
     }
   },
   "aspect": {

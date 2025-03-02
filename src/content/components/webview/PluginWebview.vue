@@ -1,7 +1,7 @@
 <template>
   <webview v-if="httpPort !== -1" ref="webview" :key="props.pluginId" class="plugin-webview-container"
-           :src="`http://localhost:${httpPort}/${props.contributionPoint}${props.entryFile}`"
-           :preload="`file://${preloadPath}`" :partition="`persist:PLUGIN_${props.pluginId}`" />
+           :src="`http://localhost:${httpPort}/${props.entryFile}`"
+           :preload="`file://${preloadPath}`" :partition="`persist:PLUGIN_${props.pluginId}#${props.contributionPoint}`" />
 </template>
 
 <script setup lang="ts">
