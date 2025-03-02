@@ -1,19 +1,33 @@
 <template>
-  <webview ref="webview" :key="props.src" class="plugin-webview-container"
-           :src="`https://localhost:${httpPort}/${props.src}`" :preload="`file://${preloadPath}`"
-           :partition="`persist:PLUGIN_${props.src}`" />
+  <webview v-if="httpPort !== -1" ref="webview" :key="props.pluginId" class="plugin-webview-container"
+           :src="`http://localhost:${httpPort}/${props.contributionPoint}${props.entryFile}`"
+           :preload="`file://${preloadPath}`" :partition="`persist:PLUGIN_${props.pluginId}`" />
 </template>
 
 <script setup lang="ts">
+import { onMounted, ref } from "vue";
+
 const props = defineProps({
-  src: {
+  pluginId: {
+    type: String,
+    required: true,
+  },
+  contributionPoint: {
+    type: String,
+    required: true,
+  },
+  entryFile: {
     type: String,
     required: true,
   },
 });
 
-const httpPort: number = window.utils.HttpUtil.getHttpPort();
+const httpPort = ref<number>(-1);
 const preloadPath: string = window.utils.PathUtil.getPreloadDir("entryProcess.js");
+
+onMounted(async () => {
+  httpPort.value = await window.utils.HttpUtil.getHttpPort();
+});
 </script>
 
 <style scoped lang="scss">

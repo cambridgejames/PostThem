@@ -7,12 +7,12 @@
   "entry": {
     "preload": "index.js",
     "webview": {
-      "web.homePage.mainTips": "index.html"
+      "postThem.webview.homePage.mainTips": "/index.html"
     }
   },
   "aspect": {
     "require": [
-      "postThem.homePage.sayHello"
+      "postThem.aspect.homePage.sayHello"
     ],
     "provide": []
   }

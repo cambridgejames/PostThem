@@ -35,8 +35,8 @@ const registerPluginWebEntry = (...scannedPlugins: Array<ScannedPlugin>): object
       const contextPath = registerContextPath((request, response) => solveRequest(scannedPlugin, request, response));
       const currentWebview = session.fromPartition(`persist:PLUGIN_${scannedPlugin.pluginManifest.uniqueId}`);
       currentWebview.webRequest.onBeforeRequest({ urls: ["*://*/*"]}, (details, callback) => {
-        if (details.url.startsWith("http://localhost") || details.url.startsWith("https://localhost")) {
-          const newUrl = details.url.replace(/(\/[^/]+)/, `/${contextPath}$1`);
+        if (!details.url.includes(contextPath) && (details.url.startsWith("http://localhost") || details.url.startsWith("https://localhost"))) {
+          const newUrl = details.url.replace(/(https?:\/\/[^/]+)(\/.*)/, `$1/${contextPath}$2`);
           return callback({ redirectURL: newUrl });
         }
         callback({});

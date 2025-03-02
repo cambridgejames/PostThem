@@ -1,29 +1,54 @@
 <template>
-  {{ helloStr }}
-  <webview ref="webview" key="props.configure.id" style="width: 300px; height: 300px;" src="https://bilibili.com"
-           :preload="`file://${preloadPath}`" partition="persist:props.configure.id" />
+  <div class="home-page-content">
+    <div class="hello-str-content">{{ helloStr }}</div>
+    <plugin-webview v-if="!isEmpty(mainTipsPluginId)" class="main-tip-content" :plugin-id="mainTipsPluginId"
+                    contribution-point="postThem.webview.homePage.mainTips" :entry-file="entryFile" />
+  </div>
 </template>
 
 <script setup lang="ts">
-import { HTMLWebviewElement } from "@interface/common";
+import PluginWebview from "@content/components/webview/PluginWebview.vue";
 import { onMounted, ref } from "vue";
 
-const preloadPath: string = window.utils.PathUtil.getPreloadDir("entryProcess.js");
-
 const helloStr = ref<string>();
-
-const webview = ref<HTMLWebviewElement>();
+const mainTipsPluginId = ref<string>("");
+const entryFile = ref<string>("");
 
 const sayHello = window.utils.PluginUtil.createAspectProxy((value: string): string => {
   return `Hello, ${value}!`;
-}, "postThem.homePage.sayHello");
+}, "postThem.aspect.homePage.sayHello");
+const isEmpty = window.utils.StringUtil.isEmpty;
 
 onMounted(async () => {
   helloStr.value = await sayHello("world");
-  // webview.value!.addEventListener("dom-ready", () => webview.value!.openDevTools());
+  const mainTipEntry = await window.utils.PluginUtil.getWebviewEntry("postThem.webview.homePage.mainTips");
+  const mainTipEntries = Object.entries<string>(mainTipEntry);
+  const [pluginId, webEntry] = mainTipEntries.length > 0 ? mainTipEntries[0] : ["", "/index.html"];
+  mainTipsPluginId.value = pluginId;
+  entryFile.value = webEntry;
 });
 </script>
 
 <style scoped>
+.home-page-content {
+  width: 100%;
+  height: 100%;
+  padding: var(--pt-article-padding);
 
+  .hello-str-content {
+    width: 100%;
+    height: 50px;
+    font-size: 30px;
+    line-height: 50px;
+    font-weight: bold;
+  }
+
+  .main-tip-content {
+    display: block;
+    margin-top: var(--pt-article-padding);
+    width: 100%;
+    height: calc(100% - var(--pt-article-padding) - 50px);
+    overflow: hidden;
+  }
+}
 </style>

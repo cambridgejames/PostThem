@@ -9,8 +9,8 @@ import { checkAndParseManifest, ManifestCheckResult } from "@preload/pluginProce
 import { PluginManager } from "@preload/pluginProcess/plugin/pluginManager";
 import { createAspectProxy } from "@preload/pluginProcess/util/aspectUtil";
 import { Logger } from "@sdk/index";
-import { ipcRenderer } from "electron/renderer";
 
+import { ipcRenderer } from "electron/renderer";
 import * as path from "node:path";
 
 const PLUGIN_MANIFEST_FILE_NAME: string = "manifest.json";
@@ -66,6 +66,16 @@ const checkAndLoadPluginManifest = async (pluginDirName: string): Promise<Plugin
   const manifest: PluginManifest = manifestCheckResult.data as PluginManifest;
   LOGGER.info(`Check plugin: '${manifest.name}', succeeded.`);
   return manifest;
+};
+
+/**
+ * 获取指定扩展点对应的Web入口列表
+ *
+ * @param {string} contributionPoint 扩展点Id
+ * @returns {Promise<object>} 插件Id -> Web入口文件路径
+ */
+export const getWebviewEntry = async (contributionPoint: string): Promise<object> => {
+  return Object.fromEntries(PLUGIN_MANAGER.getWebviewEntry(contributionPoint));
 };
 
 /**
