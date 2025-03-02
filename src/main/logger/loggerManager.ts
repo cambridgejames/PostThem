@@ -1,9 +1,9 @@
 import { is } from "@electron-toolkit/utils";
 import log4js, { Configuration, FileAppender, Logger, LogLevelFilterAppender } from "log4js";
+import { LoggerLevel } from "@interface/common";
 
 import * as path from "node:path";
 import * as fs from "node:fs";
-import { LoggerLevel } from "@interface/common";
 
 const LOG_ENCODING: string = "utf-8";
 

@@ -31,7 +31,7 @@ const webviewConfigure = reactive<Map<String, WebviewConfigureItem>>(new Map());
 const currentConfigure = ref<WebviewConfigureItem>();
 
 // 读取用户配置
-window.util.SettingsUtils.getConfigure("$.data", ConfigureType.WEBVIEW).then((data: Array<WebviewConfigureItem>) => {
+window.utils.SettingsUtil.getConfigure("$.data", ConfigureType.WEBVIEW).then((data: Array<WebviewConfigureItem>) => {
   data.forEach(item => webviewConfigure.set(item.id, item));
 });
 

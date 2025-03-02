@@ -21,6 +21,15 @@ export default defineConfig({
       externalizeDepsPlugin(),
       bytecodePlugin(),
     ],
+    build: {
+      rollupOptions: {
+        input: {
+          entryProcess: resolve(__dirname, "./src/preload/entryProcess"),
+          pluginProcess: resolve(__dirname, "./src/preload/pluginProcess"),
+          webProcess: resolve(__dirname, "./src/preload/webProcess"),
+        },
+      },
+    },
     resolve: {
       alias: {
         "@preload": resolve(__dirname, "./src/preload"),

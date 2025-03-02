@@ -1,4 +1,3 @@
-import { NamedAspect, PluginManager } from "@preload/plugin/pluginManager";
 import {
   ProceedingTarget,
   BeforeAspect,
@@ -8,10 +7,12 @@ import {
   RegisterBefore,
   RegisterAround,
   RegisterAfter,
-  AspectUtilsType, Logger,
+  AspectUtilsType,
+  Logger,
 } from "@sdk/index";
-import { RenderLogger } from "@preload/util/loggerUtil";
-import { LoggerChannel } from "@common/ipc/ipcChannel";
+import { LoggerChannel } from "@common/model/ipcChannelModels";
+import { RenderLogger } from "@preload/common/util/loggerUtil";
+import { NamedAspect, PluginManager } from "@preload/pluginProcess/plugin/pluginManager";
 
 const PLUGIN_MANAGER: PluginManager = PluginManager.getInstance();
 const LOGGER: Logger = RenderLogger.getInstance(LoggerChannel.LOGGER_LOG_MESSAGE_PRELOAD);
@@ -41,7 +42,7 @@ class ProceedingTargetImpl<T extends (...args: any[]) => any> implements Proceed
   }
 
   public proceed(): ReturnType<T> {
-    return this._aspects.length === 0 ? this._target.call(this, this._args)
+    return this._aspects.length === 0 ? this._target(this._args)
       : this._aspects[0].aspect(new ProceedingTargetImpl(this._aspectName, this._args, this._target, this._aspects.slice(1)));
   }
 }
@@ -52,7 +53,7 @@ class ProceedingTargetImpl<T extends (...args: any[]) => any> implements Proceed
  * @param target 目标函数
  * @param aspectName 切面名称
  */
-const createAspectProxy: CreateAspectProxy = <T extends (...args: any[]) => any>(target: T, aspectName: string): T => {
+export const createAspectProxy: CreateAspectProxy = <T extends (...args: any[]) => any>(target: T, aspectName: string): T => {
   return ((...args: Parameters<T>): ReturnType<T> => {
     const realArgs: Parameters<T> = doBefore(aspectName, args);
     const result: ReturnType<T> = doAround(aspectName, target, realArgs);
@@ -139,7 +140,7 @@ const registerAfter: RegisterAfter = (aspectName: string, aspectMethod: AfterAsp
   PLUGIN_MANAGER.registerAfter(aspectName, aspectMethod);
 };
 
-export const AspectUtil: AspectUtilsType = {
+export const aspectUtil: AspectUtilsType = {
   createAspectProxy,
   registerBefore,
   registerAround,
