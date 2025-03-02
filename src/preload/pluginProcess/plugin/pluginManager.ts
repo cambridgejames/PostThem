@@ -1,4 +1,4 @@
-import { PluginManifest } from "@preload/pluginProcess/plugin/manifestChecker";
+import { PluginManifest } from "@interface/manifest";
 import { AfterAspect, AroundAspect, BeforeAspect, Logger } from "@sdk/index";
 import { RenderLogger } from "@preload/common/util/loggerUtil";
 import { LoggerChannel } from "@common/model/ipcChannelModels";
@@ -23,20 +23,23 @@ interface PluginPreloadEntry {
 class ManagedPlugin implements PluginPreloadEntry {
   public readonly manifest: PluginManifest;
   public readonly pluginPath: string;
+  public readonly contextPath: string;
 
   private _mounted: boolean = false;
   private _preloadEntry?: PluginPreloadEntry;
-  // private readonly webEntry?: string;
+  private readonly _webEntry: Map<string, string> = new Map();
 
   /**
    * 实例化插件
    *
    * @param manifest 插件配置信息
    * @param pluginPath 插件根目录
+   * @param contextPath Http上下文路径
    */
-  public constructor(manifest: PluginManifest, pluginPath: string) {
+  public constructor(manifest: PluginManifest, pluginPath: string, contextPath: string) {
     this.manifest = Object.freeze(manifest);
     this.pluginPath = pluginPath;
+    this.contextPath = contextPath;
   }
 
   /**
@@ -66,6 +69,19 @@ class ManagedPlugin implements PluginPreloadEntry {
       this._preloadEntry = require(path.resolve(FileUtil.getConfigPath(preloadEntry))) as PluginPreloadEntry;
       this._preloadEntry?.onMount?.();
     }
+    Object.entries(this.manifest.entry.webview).forEach(([contributionPoint, entryFile]): void => {
+      const webviewEntry: string = path.join(PLUGIN_DIR_NAME, this.pluginPath, entryFile);
+      this._webEntry.set(contributionPoint, path.resolve(FileUtil.getConfigPath(webviewEntry)));
+    });
+  }
+
+  /**
+   * 获取Web入口
+   *
+   * @returns {Map<string, string>} Web入口
+   */
+  public getWebEntryMap(): Map<string, string> {
+    return new Map<string, string>(this._webEntry);
   }
 }
 
@@ -85,6 +101,8 @@ export class PluginManager {
   private readonly beforeAspectMap: Map<string, Array<NamedAspect<BeforeAspect>>> = new Map();
   private readonly aroundAspectMap: Map<string, Array<NamedAspect<AroundAspect>>> = new Map();
   private readonly afterAspectMap: Map<string, Array<NamedAspect<AfterAspect>>> = new Map();
+
+  private readonly webviewEntryMap: Map<string, Map<string, string>> = new Map();
 
   private constructor() {}
 
@@ -114,16 +132,24 @@ export class PluginManager {
    *
    * @param manifest 插件配置信息
    * @param pluginPath 插件根目录
+   * @param contextPath Http上下文路径
    */
-  public register(manifest: PluginManifest, pluginPath: string): void {
+  public register(manifest: PluginManifest, pluginPath: string, contextPath: string): boolean {
+    let result: boolean = true;
     if (this.managedPluginMap.has(manifest.uniqueId)) {
       LOGGER.warn(`Plugin '${manifest.uniqueId}' already registered and will be overwritten.`);
       this.removeAspectsByPluginId(manifest.uniqueId);
+      result = false;
     }
-    const managedPlugin: ManagedPlugin = new ManagedPlugin(manifest, pluginPath);
+    const managedPlugin: ManagedPlugin = new ManagedPlugin(manifest, pluginPath, contextPath);
     this.managedPluginMap.set(manifest.uniqueId, managedPlugin);
-    managedPlugin.onMount().then(() => {});
+    managedPlugin.onMount().then(() => Object.entries(manifest.entry.webview).forEach(([contributionPoint, entryFile]) => {
+      const existedEntryFileSet = this.webviewEntryMap.get(contributionPoint) || new Map<string, string>();
+      existedEntryFileSet.set(manifest.uniqueId, entryFile);
+      this.webviewEntryMap.set(contributionPoint, existedEntryFileSet);
+    }));
     LOGGER.info(`Registered plugin: "${manifest.name}".`);
+    return result;
   }
 
   /**
@@ -133,6 +159,16 @@ export class PluginManager {
    * @private
    */
   private removeAspectsByPluginId(pluginId: string): void {
+    const pluginToRemove = this.managedPluginMap.get(pluginId);
+    if (!pluginToRemove) {
+      return;
+    }
+    this.managedPluginMap.delete(pluginId);
+    pluginToRemove.getWebEntryMap().forEach((_, contributionPoint) => {
+      const existedEntryFileSet = this.webviewEntryMap.get(contributionPoint) || new Map<string, string>();
+      existedEntryFileSet.delete(pluginId);
+      this.webviewEntryMap.set(contributionPoint, existedEntryFileSet);
+    });
     const removeAspects = <T extends BaseAspectType>(aspectMap: Map<string, Array<NamedAspect<T>>>, pluginId: string): void => {
       aspectMap.forEach((namedAspects, aspectName) => {
         aspectMap.set(aspectName, namedAspects.filter(namedAspect => namedAspect.pluginId === pluginId));
@@ -256,5 +292,15 @@ export class PluginManager {
       return possiblePlugins.length > 0 ? possiblePlugins[0] : null;
     };
     return stack.slice(startIndex).reduce<ManagedPlugin | null>((acc, item) => (acc || findByStackItem(item)), null);
+  }
+
+  /**
+   * 获取指定扩展点对应的Web入口列表
+   *
+   * @param {string} contributionPoint 扩展点Id
+   * @returns {Map<string, string>} 插件Id -> Web入口文件路径
+   */
+  public getWebviewEntry(contributionPoint: string): Map<string, string> {
+    return this.webviewEntryMap.get(contributionPoint) || new Map<string, string>();
   }
 }

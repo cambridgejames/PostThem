@@ -6,11 +6,13 @@
   "uniqueId": "postThem.plugins.demoPlugin",
   "entry": {
     "preload": "index.js",
-    "webview": "index.html"
+    "webview": {
+      "postThem.webview.homePage.mainTips": "/"
+    }
   },
   "aspect": {
     "require": [
-      "postThem.homePage.sayHello"
+      "postThem.aspect.homePage.sayHello"
     ],
     "provide": []
   }

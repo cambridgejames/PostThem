@@ -1,18 +1,16 @@
-import { LoggerChannel } from "@common/model/ipcChannelModels";
+import { CommonChannel, LoggerChannel } from "@common/model/ipcChannelModels";
 import { readDir, readFile } from "@common/util/fileUtil";
 import { AnyFunction, AsyncFunction, IpcReturnMessage } from "@interface/common";
+import { PluginManifest, ScannedPlugin } from "@interface/manifest";
 import { ForwardedRenderApi } from "@preload/common/forwardedRenderApi";
 import { callRender } from "@preload/common/util/ipcRenderUtil";
 import { RenderLogger } from "@preload/common/util/loggerUtil";
-import {
-  checkAndParseManifest,
-  ManifestCheckResult,
-  PluginManifest,
-} from "@preload/pluginProcess/plugin/manifestChecker";
+import { checkAndParseManifest, ManifestCheckResult } from "@preload/pluginProcess/plugin/manifestChecker";
 import { PluginManager } from "@preload/pluginProcess/plugin/pluginManager";
 import { createAspectProxy } from "@preload/pluginProcess/util/aspectUtil";
 import { Logger } from "@sdk/index";
 
+import { ipcRenderer } from "electron/renderer";
 import * as path from "node:path";
 
 const PLUGIN_MANIFEST_FILE_NAME: string = "manifest.json";
@@ -28,13 +26,22 @@ const LOGGER: Logger = RenderLogger.getInstance(LoggerChannel.LOGGER_LOG_MESSAGE
 export const loadPlugins = async (): Promise<void> => {
   LOGGER.info("Start load plugins.");
   const pluginDirs: string[] = await readDir(PLUGIN_MANAGER.getPluginRoot());
+  const scannedPlugins: ScannedPlugin[] = [];
   for (const pluginDir of pluginDirs) {
-    const currentManifest: PluginManifest | null = await checkAndLoadPluginManifest(pluginDir);
-    if (currentManifest) {
-      PLUGIN_MANAGER.register(currentManifest, pluginDir);
+    const pluginManifest: PluginManifest | null = await checkAndLoadPluginManifest(pluginDir);
+    if (pluginManifest) {
+      scannedPlugins.push({ pluginDir, pluginManifest });
     }
   }
-  LOGGER.info("Plugins loading completed.");
+  LOGGER.info(`Scan plugins finished, ${scannedPlugins.length} plugins found.`);
+  const webviewPlugins: ScannedPlugin[] = scannedPlugins
+    .filter(plugin => Object.keys(plugin.pluginManifest.entry.webview).length > 0);
+  const contextPathMap = await ipcRenderer.invoke(CommonChannel.COMMON_PLUGIN_WEB_ENTRY_REGISTER, ...webviewPlugins);
+  const successCount: number = scannedPlugins.reduce((count, plugin) => {
+    return PLUGIN_MANAGER.register(plugin.pluginManifest, plugin.pluginDir, contextPathMap[plugin.pluginManifest.uniqueId])
+      ? count + 1 : count;
+  }, 0);
+  LOGGER.info(`Plugins loading completed, ${successCount} plugins registered.`);
 };
 
 /**
@@ -59,6 +66,16 @@ const checkAndLoadPluginManifest = async (pluginDirName: string): Promise<Plugin
   const manifest: PluginManifest = manifestCheckResult.data as PluginManifest;
   LOGGER.info(`Check plugin: '${manifest.name}', succeeded.`);
   return manifest;
+};
+
+/**
+ * 获取指定扩展点对应的Web入口列表
+ *
+ * @param {string} contributionPoint 扩展点Id
+ * @returns {Promise<object>} 插件Id -> Web入口文件路径
+ */
+export const getWebviewEntry = async (contributionPoint: string): Promise<object> => {
+  return Object.fromEntries(PLUGIN_MANAGER.getWebviewEntry(contributionPoint));
 };
 
 /**

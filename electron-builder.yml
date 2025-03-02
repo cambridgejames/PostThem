@@ -3,18 +3,21 @@ productName: post-them
 directories:
   buildResources: build
 files:
-  - '!**/.idea/*'
-  - '!**/.vscode/*'
-  - '!resources/*'
-  - '!src/*'
-  - '!electron.vite.config.{js,ts,mjs,cjs}'
-  - '!{.eslintignore,.eslintrc.js,dev-app-update.yml,CHANGELOG.md,README.md}'
-  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
-  - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+  - "!**/.idea/*"
+  - "!**/.vscode/*"
+  - "!log/*"
+  - "!out/content/font/*"
+  - "!resources/*"
+  - "!src/*"
+  - "!electron.vite.config.{js,ts,mjs,cjs}"
+  - "!{.eslintignore,.eslintrc.js,dev-app-update.yml,CHANGELOG.md,README.md}"
+  - "!{.env,.env.*,.npmrc,pnpm-lock.yaml}"
+  - "!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}"
 extraResources:
-  from: "./resources"
-  to: "../"
-asarUnpack:
+  - from: "./resources"
+    to: "../"
+  - from: "./out/content/font"
+    to: "./font"
 win:
   executableName: post-them
 nsis:

@@ -1,3 +1,5 @@
+import { WebviewTag } from "electron";
+
 /**
  * Logger日志等级
  */
@@ -10,20 +12,7 @@ export enum LoggerLevel {
   FATAL = "fatal",
 }
 
-export interface HTMLWebviewElement extends HTMLElement {
-  src: string;
-  nodeintegration?: boolean;
-  nodeintegrationinsubframes?: boolean;
-  plugins?: boolean;
-  preload?: string;
-  httprefeerrer?: string;
-  useragent?: string;
-  disablewebsecurity?: boolean;
-  partition?: string;
-  allowpopups?: boolean;
-  webpreferences?: string;
-  enableblinkfeatures?: string;
-  disableblinkfeatures?: string;
+export interface HTMLWebviewElement extends WebviewTag {
 }
 
 /**

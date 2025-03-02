@@ -1,3 +1,5 @@
+import { setupServer } from "@main/http/httpUtil";
+import { setupPluginWebEntry } from "@main/http/pluginWebEntry";
 import { LoggerManager } from "@main/logger/loggerManager";
 import { setupRender2RenderIpc } from "@main/ipc/ipcForwardUtil";
 import { setupRenderLogging } from "@main/logger/loggerUtil";
@@ -46,7 +48,6 @@ const createHiddenWindow = (hiddenWindowOption: BrowserWindowConstructorOptions)
     <head>
       <meta charset="UTF-8" />
       <title>${hiddenWindowOption.title}</title>
-      <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
       <meta http-equiv="Content-Security-Policy"
         content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:"
       />
@@ -54,7 +55,7 @@ const createHiddenWindow = (hiddenWindowOption: BrowserWindowConstructorOptions)
     <body/>
   </html>`).then(() => {});
   if (is.dev && process.env["ELECTRON_RENDERER_URL"]) {
-    hiddenWindow.webContents.openDevTools();
+    // hiddenWindow.webContents.openDevTools();
   }
 };
 
@@ -76,6 +77,9 @@ const createWindow = (): void => {
 
 app.whenReady().then(() => {
   electronApp.setAppUserModelId("powerinv.postThem.client");
+  setupServer().then(() => {
+    setupPluginWebEntry();
+  });
   setupRenderLogging();
   setupRender2RenderIpc();
   app.on("browser-window-created", (_, window) => {

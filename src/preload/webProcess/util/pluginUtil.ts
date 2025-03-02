@@ -1,11 +1,11 @@
-import { Logger } from "@sdk/index";
 import { LoggerChannel } from "@common/model/ipcChannelModels";
-import { AnyFunction, AsyncFunction, IpcReturnMessage } from "@interface/common";
-import { RenderLogger } from "@preload/common/util/loggerUtil";
-import { callRender, callRenderAsync, registerOnRender } from "@preload/common/util/ipcRenderUtil";
-import { ForwardedRenderApi } from "@preload/common/forwardedRenderApi";
-
+import { formatException } from "@common/util/exceptionUtil";
 import * as StringUtil from "@common/util/stringUtil";
+import { AnyFunction, AsyncFunction, IpcReturnMessage } from "@interface/common";
+import { ForwardedRenderApi } from "@preload/common/forwardedRenderApi";
+import { callRender, callRenderAsync, registerOnRender } from "@preload/common/util/ipcRenderUtil";
+import { RenderLogger } from "@preload/common/util/loggerUtil";
+import { Logger } from "@sdk/index";
 
 const LOGGER: Logger = RenderLogger.getInstance(LoggerChannel.LOGGER_LOG_MESSAGE_PRELOAD);
 
@@ -45,7 +45,7 @@ class TargetProxy<T extends (...args: any[]) => any> {
       this._targetResult = this._target(...args);
       return this._targetResult!;
     } catch (exception) {
-      this._exception = exception instanceof Error ? exception : new Error(exception);
+      this._exception = formatException(this._exception);
       throw this._exception;
     }
   }
@@ -171,4 +171,19 @@ export const createAspectProxy = <T extends (...args: any[]) => any>(target: T, 
 export const loadPlugins = async (): Promise<void> => {
   callRender(ForwardedRenderApi.PLUGIN_WINDOW_LOAD_ALL_PLUGINS);
   LOGGER.info("Start loading plugins.");
+};
+
+/**
+ * 获取指定扩展点对应的Web入口列表
+ *
+ * @param {string} contributionPoint 扩展点Id
+ * @returns {Promise<{ [key: string]: string }>} 插件Id -> Web入口文件路径
+ */
+export const getWebviewEntry = async (contributionPoint: string): Promise<{ [key: string]: string }> => {
+  const returnValue = callRender(ForwardedRenderApi.PLUGIN_WINDOW_GET_WEBVIEW_ENTRY, contributionPoint);
+  if (returnValue.status) {
+    return returnValue.data! as { [key: string]: string };
+  }
+  LOGGER.warn(`Get webview entry for ${contributionPoint} failed: ${returnValue.message}.\n`, returnValue.error);
+  return {};
 };
